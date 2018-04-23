@@ -1,0 +1,149 @@
+@import "../../common";
+
+@wizardH1Size: 30px;
+@wizardH1LineHeight: 1.1;
+@wizardTBPadding: 20px;
+@wizardHeaderBorderSize: 1px;
+@wizardContainerPadding: 30px;
+
+.wizard-container {
+  height: 100vh;
+  padding: 0 2*@containerMarginSize;
+  margin: 0 -15px;
+}
+
+/deep/ .paddingDoubleRowHack {
+  margin: 0 -2*@containerMarginSize;
+  .paddingDoubleLRHack {
+    padding: 0 2*@containerMarginSize;
+  }
+}
+
+.wizard-header-container {
+  background-color: @whiteColor;
+}
+.wizard-header {
+  //margin: 0 -15px;
+  //padding: 0 15px;
+  background-color: @whiteColor;
+  margin: 0 @containerMarginSize;
+
+  border-bottom: @wizardHeaderBorderSize solid @lightGrayColor;
+  h1 {
+    .gothamMediumFont(@wizardH1Size);
+    line-height: @wizardH1LineHeight;
+    color: @darkGrayColor;
+    margin: @wizardTBPadding 0;
+  }
+}
+@stepsContainerHeight: @wizardH1LineHeight*@wizardH1Size + 2*@wizardTBPadding;
+.steps-container {
+  height: @stepsContainerHeight;
+  position: relative;
+  text-align: right;
+
+  .steps {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(0, -50%);
+  }
+
+}
+
+ol.steps {
+  list-style: none;
+  counter-reset: li;
+  padding: 0;
+  margin: 0;
+
+
+  .active li {
+    color: @blueColor;
+    font-weight: 600;
+    &::before {
+      color: @whiteColor;
+      border-color: @blueColor;
+      background-color: @blueColor;
+    }
+  }
+
+  .done li {
+    &::before {
+      content: "\E013";
+      font-family: 'Glyphicons Halflings';
+      font-style: normal;
+      font-weight: normal;
+      -webkit-font-smoothing: antialiased;
+      color: @whiteColor;
+      border-color: @greenColor;
+      background-color: @greenColor;
+    }
+  }
+
+  > a {
+    &.disabled {
+      pointer-events: none;
+      cursor: default;
+    }
+
+    &:focus, &:hover {
+      text-decoration: none;
+    }
+
+    margin-right: 30px;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  li {
+    counter-increment: li;
+    color: @grayColor;
+    .sourceSansProFont(400, 16px);
+    display: inline-block;
+
+
+    &::before {
+      .sourceSansProFont(600, 16px);
+
+      border: 2px solid @grayColor;
+      background-color: transparent;
+      color: @grayColor;
+      padding: 0 4px;
+      text-align: center;
+      content: counter(li);
+      display: inline-block;
+      line-height: 2.1em;
+      width: 2.3em;
+      border-radius: 2.2em;
+      margin-right: 10px;
+    }
+  }
+}
+
+#loading-container {
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 10000;
+  position: fixed;
+  top: 0;//@wizardHeaderBorderSize + @stepsContainerHeight;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  .loading-content {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    color: @whiteColor;
+    text-align: center;
+    .gothamMediumFont(15px);
+
+    img {
+      height: 22px;
+      margin-bottom:15px;
+    }
+  }
+}

@@ -120,13 +120,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "app",
+      ["app", "hdx", "hdx-tools"],
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "app",
+      ["app", "hdx", "hdx-tools"],
       "kebab-case"
     ],
     "no-output-on-prefix": true,

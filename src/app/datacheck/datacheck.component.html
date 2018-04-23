@@ -1,0 +1,26 @@
+<div class="wizard-container">
+  <div class="paddingDoubleRowHack wizard-header-container">
+    <div class="paddingRowHack wizard-header">
+      <div class="paddingLeftHack paddingRightHack">
+        <div class="row">
+          <div class="col-xs-12">
+            <h1>Quick Charts</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div id="current-step-content" class="col-xs-12">
+      <router-outlet></router-outlet>
+    </div>
+    <div id="loading-container" *ngIf="loadingStatus">
+      <div class="loading-content">
+        <div><img src="./assets/loading-dots.gif"></div>
+        <div>Loading...</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
