@@ -12,6 +12,7 @@ import { CommonModule } from './common/common.module';
 import { AnalyticsService } from './common/analytics.service';
 import { SimpleModule } from 'hxl-preview-ng-lib';
 import { HttpService } from './shared/http.service';
+import { HotTableModule } from '@handsontable/angular';
 
 export const HTTP_SERVICE_PROVIDERS: any = {
   provide: Http,
@@ -36,7 +37,8 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions) {
     BrowserModule,
     HttpModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    HotTableModule
   ],
   providers: [
     HTTP_SERVICE_PROVIDERS

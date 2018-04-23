@@ -22,7 +22,8 @@
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "hdx",
       "styles": [
-        "styles.less"
+        "styles.less",
+        "../node_modules/handsontable/dist/handsontable.full.css"
       ],
       "scripts": [],
       "environmentSource": "environments/environment.ts",
