@@ -1,3 +1,79 @@
-<p>
-  import works!
-</p>
+<div id="step1" class="step">
+  <div class="paddingDoubleRowHack step-header">
+    <div class="paddingDoubleLRHack">
+      <div class="row" style="position: relative;">
+        <div class="col-xs-9">
+          <div class="title">{{stepName}}</div>
+          <div class="description">
+            Import a spreadsheet or CSV file. Then, scroll down to preview and customize. Supported formats: <strong>CSV, XLS and XLSX.</strong>
+          </div>
+        </div>
+        <span class="btn-actions">
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="row step-content">
+    <div class="col-xs-3">
+      <div class="radio-selection">
+        <label for="data-source-sample"><input type="radio" value="sample" name="data-source" (change)="changeDatasource($event);" [checked]="sampleUrlSelected" id="data-source-sample"> Try our sample data</label>
+        <label for="data-source-url-apis">
+          <input type="radio" value="url" name="data-source" (change)="changeDatasource($event);" [checked]="!sampleUrlSelected" id="data-source-url-apis"> Import from URL/APIs
+          <ul>
+            <li>
+              <a href="javascript:void(0)" hdxDropboxchooser (urlSelect)="updateSelectedUrl($event)">
+                <img src="./assets/icons/dropbox.png"> Dropbox
+              </a>
+            </li>
+            <li>
+              <a href="javascript:void(0)" hdxGooglepicker (urlSelect)="updateSelectedUrl($event)">
+                <img src="./assets/icons/drive.png">Google Drive
+              </a>
+            </li>
+            <li class="disabled"><img src="./assets/icons/hdx.ico">HDX (Coming soon)</li>
+          </ul>
+        </label>
+      </div>
+    </div>
+    <div *ngIf="sampleUrlSelected" class="col-xs-9 source-sample-data">
+      <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
+      <div *ngFor="let s of sampleData" >
+        <label class="sample-item active">
+          <input name="sample-data-selection" value="{{ s.url }}" type="radio" [checked]=" (s.url === selectedUrl) ? true : null" (change)="changeSampleUrl(s.url);">
+          <span class="sample-content">
+          <span class="sample-title">
+            {{ s.name }}
+          </span>
+          <span class="sample-source">
+            {{ s.org }}
+          </span>
+          <span class="sample-date">
+            {{ s.url }}
+          </span>
+        </span>
+        </label>
+      </div>
+    </div>
+    <div *ngIf="!sampleUrlSelected" class="col-xs-9 source-custom-url">
+      <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
+      <label for="source-custom-url-field">Enter URL</label>
+      <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field" placeholder="eg. http://example.com/population-jan-2011.json">
+    </div>
+  </div>
+  <div class="paddingDoubleRowHack customize-section">
+    <div class="paddingDoubleLRHack">
+      <div class="row step-content">
+        <div class="col-xs-12">
+          <div class="title">Preview data:</div>
+        </div>
+        <div class="col-xs-12">
+          <div class="quick-charts-render">
+            <!--<iframe #quickChartsIFrame id="quick-charts-iframe" [src]="iFrameUrl" (load)="iFrameLoaded()"-->
+                    <!--style="border:none; width:100%; min-height:520px">-->
+            <!--</iframe>-->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

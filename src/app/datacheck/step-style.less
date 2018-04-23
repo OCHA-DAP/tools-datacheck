@@ -1,0 +1,145 @@
+@import "../../common";
+@import "../../hdx-styles/src/common/less/base/buttons";
+@import "form-styles";
+
+.step {
+  color: @darkGrayColor;
+  position: relative;
+
+
+  @stepHeaderMarginTop: 32px;
+  @stepHeaderMarginBottom: 25px;
+  @stepHeaderTitleFontSize: 18px;
+  @stepHeaderDescriptionFontSize: 16px;
+  @stepHeaderLineHeight: 1.42;
+  .step-header {
+    background-color: @whiteColor;
+    //position: absolute;
+    //width: 100%;
+
+
+    .description {
+      .sourceSansProFont(400, @stepHeaderDescriptionFontSize);
+      margin-bottom: @stepHeaderMarginBottom;
+      line-height: @stepHeaderLineHeight;
+    }
+  }
+
+  .title {
+    margin-top: @stepHeaderMarginTop;
+    margin-bottom: 5px;
+    .sourceSansProFont(600, @stepHeaderTitleFontSize);
+    line-height: @stepHeaderLineHeight;
+  }
+
+  .customize-section {
+    background-color: @extraLightGrayColor;
+  }
+
+  .btn {
+    &:hover{
+
+    }
+    &.next-step, &.btn-empty-black {
+      .gothamBoldFont(14px);
+      padding: 11px 26px;
+
+      .caret {
+        border-width: 8px;
+        margin-left: 10px;
+      }
+    }
+  }
+
+
+  .btn-actions {
+    margin-top: 32px;
+    float: right;
+  }
+
+  .section-title {
+    .sourceSansProFont(600, 16px);
+    color: @darkGrayColor;
+  }
+  .step-content {
+    //padding-top: (@stepHeaderMarginBottom + @stepHeaderMarginTop + @stepHeaderLineHeight*@stepHeaderTitleFontSize +
+    //              @stepHeaderLineHeight*@stepHeaderDescriptionFontSize) + 45px;
+    margin-top: 45px;
+    margin-bottom: 45px;
+
+    background-color: @extraLightGrayColor;
+    .sourceSansProFont(400, 16px);
+    color: @darkGrayColor;
+    label {
+      font-weight: 400;
+    }
+
+    .data-source {
+      margin-top: 10px;
+      height: 1.42em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .source-custom-url {
+      label {
+        display: block;
+        .sourceSansProFont(400, 16px);
+      }
+      input {
+        width: 100%;
+      }
+      margin-bottom: 25px;
+    }
+    .radio-selection {
+      .radio-title {
+        .sourceSansProFont(600, 18px);
+        margin-bottom: 10px;
+        color: @darkGrayColor;
+      }
+
+      label {
+        display: block;
+        padding-left: 20px;
+        position: relative;
+
+        input[type=radio] {
+          margin-right: 5px;
+          position: absolute;
+          left: 0;
+        }
+        ~ label {
+          margin-top: 10px;
+        }
+
+        ul {
+          list-style: none;
+          padding-left: 0;
+          li {
+            padding-left: 25px;
+            position: relative;
+            margin: 5px 0;
+            color: @blueColor;
+
+
+            &.disabled {
+              color: @lightGrayColor;
+              cursor: not-allowed;
+            }
+
+            img {
+              height: 1.2em;
+              position: absolute;
+              left: 0;
+              top: 50%;
+              transform: translate(0, -50%);
+            }
+          }
+        }
+
+      }
+    }
+
+  }
+}

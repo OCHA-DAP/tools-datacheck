@@ -6,6 +6,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./datacheck.component.less']
 })
 export class DatacheckComponent implements OnInit {
+  loadingStatus: false;
 
   constructor() { }
 

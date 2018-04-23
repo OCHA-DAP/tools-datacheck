@@ -1,0 +1,18 @@
+@import "../../common";
+
+@wizardFormBorderRadius: 3px;
+@wizardFormTBPadding: 5px;
+@wizardFormLRPadding: 10px;
+
+input, textarea{
+  &.wizard-input {
+    padding: @wizardFormTBPadding @wizardFormLRPadding;
+    border: 1px solid @lightGrayColor;
+    border-radius: @wizardFormBorderRadius;
+
+    &::placeholder {
+      color: @lightGrayColor;
+      .sourceSansProFont(300, 14px);
+    }
+  }
+}

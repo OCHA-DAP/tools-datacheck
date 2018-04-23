@@ -9,6 +9,9 @@
       "outDir": "dist",
       "assets": [
         "assets",
+        { "glob": "**/*", "input": "./hdx-styles/src/common/fonts", "output": "./assets/fonts" },
+        { "glob": "**/*", "input": "./hdx-styles/src/common/images/icons", "output": "./assets/icons" },
+        { "glob": "filter_loading.gif", "input": "./hdx-styles/src/common/images", "output": "./assets" },
         "favicon.ico"
       ],
       "index": "index.html",

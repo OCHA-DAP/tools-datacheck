@@ -1,0 +1,101 @@
+@import "../step-style";
+
+@sampleItemPadding: 10px;
+@sampleItemRadioSize: 20px;
+.sample-item {
+  position: relative;
+  max-width: 800px;
+  width: 100%;
+  background-color: @whiteColor;
+  margin-bottom: 10px;
+
+  &.active {
+    border-color: @blueColor;
+  }
+
+  input[type='radio'] {
+    position: absolute;
+    left: @sampleItemPadding;
+    top: @sampleItemPadding;
+  }
+
+  input[type='radio']:checked + .sample-content {
+    border-color: @blueColor;
+  }
+
+  .sample-content {
+    display: block;
+    padding: @sampleItemPadding @sampleItemPadding @sampleItemPadding @sampleItemPadding + @sampleItemRadioSize;
+    border: 1px solid @whiteColor;
+  }
+
+  .sample-title, .sample-source, .sample-date {
+    display: block;
+  }
+
+  .sample-title {
+    color: @blueColor;
+  }
+
+  .sample-source {
+    color: @darkGrayColor;
+    font-size: 14px;
+  }
+
+  .sample-date {
+    font-size: 14px;
+    color: @grayColor;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+  }
+}
+
+.quick-charts-render {
+  padding: 10px 20px;
+  background-color: @whiteColor;
+}
+.share-section {
+  ul {
+    list-style: none;
+    padding: 0;
+    a {
+      cursor: pointer;
+    }
+    a.disabled {
+      color: @lightGrayColor;
+      cursor: not-allowed;
+    }
+  }
+
+  @embedCodeFontSize: 16px;
+  @embedCodeLineHeight: 1.5*@embedCodeFontSize;
+  #embedCode {
+    margin-top: 10px;
+    .sourceSansProFont(400, @embedCodeFontSize);
+    width: 100%;
+    line-height: @embedCodeLineHeight;
+    height: 4*@embedCodeLineHeight + 2*@wizardFormTBPadding;
+  }
+}
+
+.vertical-menu {
+  list-style: none;
+  display: inline;
+
+  li {
+    display: inline;
+    &:after {
+      padding: 0 10px;
+      content: '|';
+    }
+    &:last-child {
+      margin-right: 0;
+      &:after {
+        content: none;
+      }
+    }
+  }
+}
+
