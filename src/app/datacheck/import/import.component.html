@@ -106,32 +106,29 @@
               <div class="error-report">
                 <div class="error-breadcrumb">
                   <ul>
-                    <li>Report summary</li>
-                    <li class="active">Column {{ tableColumnName }}</li>
-                    <li class="active">Cell {{ tableColumnName + selectedRow }}</li>
+                    <li [ngClass]="{'active': selectedColumn == null }" (click)="selectedColumn = null; selectedRow = null;">Report summary</li>
+                    <li *ngIf="selectedColumn != null" [ngClass]="{'active': selectedRow == null }" (click)="selectedRow = null;" class="active">Column {{ selectedColumnName }}</li>
+                    <li *ngIf="selectedRow != null" class="active">Cell {{ (selectedRow+1) }}</li>
                   </ul>
                 </div>
                 <div class="error-title">
                   {{ selectedTitle }}
                 </div>
                 <div class="row ">
-                  <div class="col-xs-4 section">
+                  <div class="col-xs-6 section">
                     <div class="section-title">Issues</div>
                   </div>
-                  <div class="col-xs-8 section">
+                  <div class="col-xs-6 section">
                     <div class="section-title">Cell</div>
                   </div>
                 </div>
-                <div class="row">
-                  <div class="col-xs-4 section">
-                    <div>8 unrecognised place names</div>
+                <div *ngFor="let error of errorList" class="row">
+                  <div class="col-xs-6 section">
+                    <div>{{ error.location_count }} {{ error.description }}</div>
                   </div>
-                  <div class="col-xs-8 section">
+                  <div class="col-xs-6 section">
                     <div>
-                      <a class="cell-href">A22</a>
-                      <a class="cell-href">A54</a>
-                      <a class="cell-href">A59</a>
-                      <a class="cell-href">A62</a>
+                      <a *ngFor="let location of error.locations" class="cell-href" (click)="jumpTo(location.hashtag, location.row)">{{ getColFromHashtag(location.hashtag) + (location.row + 1)}}</a>
                     </div>
                   </div>
                 </div>

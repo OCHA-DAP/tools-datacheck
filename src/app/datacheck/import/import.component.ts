@@ -53,11 +53,13 @@ export class ImportComponent implements OnInit {
   errorsXY = {};
   selectedColumn: number;
   selectedRow: number;
-  selectedTitle: string;
+  _selectedTitle: string;
   errorReport: any;
   colToHash = {};
   hashToCol = {};
   private bordersInitialised = false;
+  private _hotInstance: Handsontable;
+  selectedColumnName: string;
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
@@ -89,6 +91,8 @@ export class ImportComponent implements OnInit {
 
   protected reloadDataAndValidate() {
     this.errorsXY = {};
+    this.colToHash = {};
+    this.hashToCol = {};
 
     const dataObservable = this.getData();
     dataObservable.subscribe((data) => {
@@ -100,14 +104,12 @@ export class ImportComponent implements OnInit {
       }
       console.log('colToHash map is built');
 
-      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
-      hotInstance.loadData(data);
+      this.hotInstance.loadData(data);
       console.log('Data loaded');
     });
 
     const locationsObservable = this.validateData();
     locationsObservable.subscribe((report) => {
-      console.log('test');
       this.errorReport = report;
       report.flatErrors.forEach((val, index) => {
         let errorsX = this.errorsXY[val.hashtag];
@@ -118,9 +120,8 @@ export class ImportComponent implements OnInit {
         errorsX[val.row] = val.row;
       });
       console.log('showing errors');
-      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
-      hotInstance.render();
-      hotInstance.loadData(this.data);
+      this.hotInstance.render();
+      this.hotInstance.loadData(this.data);
     });
   }
 
@@ -149,11 +150,11 @@ export class ImportComponent implements OnInit {
     let valueRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
       const hash = this.colToHash[col];
-      if (hash) {
-        console.log('rendering WITH HASH');
-      } else {
-        console.log('rendering NO HASH')
-      }
+      // if (hash) {
+      //   console.log('rendering WITH HASH');
+      // } else {
+      //   console.log('rendering NO HASH')
+      // }
       // if row contains negative number
       if (this.errorsXY[hash] !== undefined && this.errorsXY[hash][row] !== undefined) {
         // add class "negative"
@@ -166,12 +167,11 @@ export class ImportComponent implements OnInit {
     };
     let beforeKeyDown = (event: KeyboardEvent) => {
       console.log("Key down");
-      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
       event.stopPropagation();
       event.stopImmediatePropagation();
       event.preventDefault();
 
-      let selection = hotInstance.getSelected();
+      let selection = this.hotInstance.getSelected();
       console.log(`Selection: ${selection}`);
       const selectedCol:number = selection[0][1];
       const selectedRow:number = selection[0][0];
@@ -219,27 +219,29 @@ export class ImportComponent implements OnInit {
       }
 
       if (nextRow !== undefined && nextCol !== undefined) {
-        hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
-        hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
+        this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
+        this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
       } else {
         if (nextCol !== undefined) {
-          hotInstance.selectColumns(nextCol);
-          hotInstance.scrollViewportTo(1, nextCol, true, true);
+          this.hotInstance.selectColumns(nextCol);
+          this.hotInstance.scrollViewportTo(1, nextCol, true, true);
         }
       }
     };
     let afterSelection = (r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) => {
       this.initBorders();
       console.log(`Selected ${r}, ${c}, ${r2}, ${c2}`);
-      if ((c2-c)*(r2-r) > 1) {
+      this.selectedColumn = null;
+      this.selectedRow = null;
+      if ((c2 === c) && ((r2-r) > 1)) {
         //column selected
         this.selectedColumn = c;
-        this.selectedRow = null;
       } else {
         //cell selected
         this.selectedColumn = c;
         this.selectedRow = r;
       }
+      this.selectedColumnName = this.hotInstance.getColHeader(this.selectedColumn);
       this.updateErrorPopup();
     };
     this.tableSettings = {
@@ -339,19 +341,59 @@ export class ImportComponent implements OnInit {
   private updateErrorPopup() {
     if (this.selectedColumn !== null){
       let errorsX = this.errorsXY[this.selectedColumn];
-      this.selectedTitle = this.data[0][this.selectedColumn];
+      this._selectedTitle = this.data[0][this.selectedColumn];
       if (errorsX !== undefined) {
         if (this.selectedRow !== null) {
           let error = errorsX[this.selectedRow];
-          this.selectedTitle = this.data[this.selectedRow][this.selectedColumn];
+          this._selectedTitle = this.data[this.selectedRow][this.selectedColumn];
         }
       }
     } else {
-      this.selectedTitle = null;
+      this._selectedTitle = null;
     }
   }
 
-  get tableColumnName(): string {
-    return 'A';
+  get hotInstance(): Handsontable {
+    if (!this._hotInstance) {
+      this._hotInstance = this.hotRegisterer.getInstance(this.tableId);
+    }
+    return this._hotInstance;
+  }
+
+  get errorList() {
+    if (this.errorReport){
+      let issues: any[] = JSON.parse(JSON.stringify(this.errorReport.issues));
+      if (this.selectedColumn != null) {
+        issues = issues.filter((issue) => {
+          let locations = issue.locations.slice(0);
+          locations = locations.filter((location) => {
+            // return (location.col == this.selectedColumn) &&
+            return (location.hashtag == this.colToHash[this.selectedColumn]) &&
+              (this.selectedRow == null || location.row == this.selectedRow);
+          });
+          issue.locations = locations;
+          issue.location_count = locations.length;
+          return locations.length > 0;
+        });
+      }
+      console.log(issues);
+      return issues;
+    }
+    return [];
+  }
+
+  getColFromHashtag(hashtag: string) {
+    return this.hotInstance.getColHeader(this.hashToCol[hashtag]);
+  }
+
+  get selectedTitle(): string {
+    if (this.selectedColumn)
+      return this._selectedTitle;
+    return 'XYZ problems found';
+  }
+
+  jumpTo(hashtag: string, row: number) {
+    this.selectedColumn = this.hashToCol[hashtag];
+    this.selectedRow = row;
   }
 }

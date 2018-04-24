@@ -129,8 +129,10 @@
       }
       li{
         display: inline;
+        cursor: pointer;
         &.active {
           .sourceSansProFont(700, 12px);
+          cursor: default;
         }
       }
     }
@@ -152,10 +154,12 @@
       color: @orangeColor;
       text-decoration: underline;
       cursor: pointer;
+      display: inline-block;
 
       &:after {
         content: ',';
         color: @whiteColor;
+        margin-right: 5px;
       }
       &:last-child {
         &:after {
