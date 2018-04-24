@@ -409,13 +409,13 @@ export class ImportComponent implements OnInit {
     let colorBorders = function () {
       let borders = document.querySelectorAll('.handsontable .wtBorder');
       for (let i = 0; i < borders.length; i++) {
-        let border = borders[i];
+        let border: HTMLElement = borders[i] as HTMLElement;
         border.style.backgroundColor = '#f2645a';
         if (border.style.width === "1px") {
           border.style.width = "2px";
         }
-        if (border.style.heigth === "1px") {
-          border.style.heigth = "2px";
+        if (border.style.height === "1px") {
+          border.style.height = "0";
         }
       }
     };
