@@ -4,11 +4,11 @@ import { DropboxchooserDirective } from '../../common/dropboxchooser.directive';
 import { Component, OnInit, ChangeDetectorRef, ViewChild, HostListener, ElementRef } from '@angular/core';
 import { AnalyticsService } from '../../common/analytics.service';
 import { HttpService } from '../../shared/http.service';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer} from '@angular/platform-browser';
 import { Http } from '@angular/http';
-import { environment } from '../../../environments/environment';
 import * as Handsontable from 'handsontable';
 import { HotTableRegisterer } from '@handsontable/angular';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-import',
@@ -38,18 +38,8 @@ export class ImportComponent implements OnInit {
   ];
 
   httpService: HttpService;
-  shareUrl: string = null;
   embedUrl: string = null;
-  iFrameUrl: SafeResourceUrl = null;
-  pngDownloadFlag: Boolean = false;
-  pngDownloadUrl: SafeResourceUrl = null;
-  menuEmbed = true;
-
-  @ViewChild('quickChartsIFrame')
-  private quickChartsIFrame: ElementRef;
-
-  @ViewChild('embedCode')
-  private embedCode: ElementRef;
+  errorsXY = {};
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
@@ -63,14 +53,8 @@ export class ImportComponent implements OnInit {
   }
 
   set selectedUrl(selectedUrl: string) {
-    // this.getWizardConfig().hxlCheckError = null;
     this._selectedUrl = selectedUrl;
-    const sivOpt: ScrollIntoViewOptions = {
-      behavior: 'smooth'
-    };
-    this.quickChartsIFrame.nativeElement.scrollIntoView(sivOpt);
     this.embedUrl = null;
-    this.updateIframeUrl();
   }
 
   ngOnInit() {
@@ -79,17 +63,204 @@ export class ImportComponent implements OnInit {
       this.httpService.turnOnModal();
       const urlParam = params.get('url');
       if (urlParam) {
-        // this.wizardConfigService.getWizardConfigData().url = urlParam;
         this._selectedUrl = urlParam;
         this.sampleUrlSelected = false;
       }
-      const recipeUrlParam = params.get('recipeUrl');
-      if (recipeUrlParam) {
-        // this.wizardConfigService.getWizardConfigData().recipeUrl = recipeUrlParam;
+    });
+    let dataObservable = this.getData();
+    let locationsObservable = this.validateData();
+    locationsObservable.subscribe((locations) => {
+      locations.forEach((val, index) => {
+        if (val.error_value === 0)
+          return;
+        let errorsX = this.errorsXY[val.col];
+        if (errorsX === undefined) {
+          errorsX = {};
+          this.errorsXY[val.col] = errorsX;
+        }
+        errorsX[val.row] = val.error_value;
+      });
+    });
+    dataObservable.subscribe((data) => {
+      this.data = data;
+    });
+
+    let headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {
+      Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+      if (row === 0) {
+        td.style.fontWeight = 'bold';
+        td.style.color = 'green';
+        td.style.background = '#CEC';
+      } else {
+        td.style.fontWeight = 'bold';
+      }
+    };
+
+    let valueRenderer = (instance, td, row, col, prop, value, cellProperties) => {
+      Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+
+      // if row contains negative number
+      if (this.errorsXY[col] !== undefined && this.errorsXY[col][row] !== undefined) {
+        // add class "negative"
+        td.style.color = 'red';
       }
 
-      this.updateIframeUrl();
-    });
+      if (value === 'MDG72') {
+        td.style.fontStyle = 'italic';
+      }
+    }
+
+    let beforeKeyDown = (event: KeyboardEvent) => {
+      console.log("Key down");
+      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      event.preventDefault();
+
+      let selection = hotInstance.getSelected();
+      console.log(`Selection: ${selection}`);
+      const selectedCol:number = selection[0][1];
+      const selectedRow:number = selection[0][0];
+      let nextCol: number, nextRow: number;
+
+      let errorsX = this.errorsXY[selectedCol];
+      if (event.keyCode == 38) {
+        // up arrow
+        console.log("up arrow");
+        for (let key in errorsX) {
+          const val: number = parseInt(key);
+          if ((val < selectedRow) && (nextRow === undefined || nextRow < val)) {
+            nextRow = val;
+          }
+        }
+        if (nextRow !== undefined) {
+          nextCol = selectedCol;
+        } else {
+          nextCol = selectedCol;
+        }
+      }
+      else if (event.keyCode == 40) {
+        // down arrow
+        console.log("down arrow");
+        for (let key in errorsX) {
+          const val: number = parseInt(key);
+          if ((val > selectedRow) && (nextRow === undefined || nextRow > val)) {
+            nextRow = val;
+          }
+        }
+        if (nextRow !== undefined) {
+          nextCol = selectedCol;
+        }
+      }
+      else if (event.keyCode == 37) {
+        // left arrow
+        console.log("left arrow");
+        nextCol = selectedCol - 1;
+      }
+      else if (event.keyCode == 39) {
+        // right arrow
+        console.log("right arrow");
+        nextCol = selectedCol + 1;
+      }
+
+      if (nextRow !== undefined && nextCol !== undefined) {
+        hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
+      } else {
+        if (nextCol !== undefined) {
+          hotInstance.selectColumns(nextCol);
+        }
+      }
+    };
+    this.tableSettings = {
+      data: this.data,
+      editor: false,
+      fillHandle: false,
+      copyPaste: false,
+      colHeaders: true,
+      fixedRowsTop: 2,
+      width: "100%",
+      selectionModeString: 'range',
+      height: 400,
+      afterSelection: function(r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) {
+        console.log(`Selected ${r}, ${c}, ${r2}, ${c2}`);
+      },
+      beforeKeyDown: beforeKeyDown,
+      cells: function(row, col, prop) {
+        let cellProperties: any = {};
+
+        if (row < 2) {
+          cellProperties.renderer = headerRenderer;
+        } else {
+          cellProperties.renderer = valueRenderer;
+        }
+
+        return cellProperties;
+      },
+      rowHeaders: true
+    };
+  }
+
+  private validateData(): Observable<Array<any>> {
+    const locations = [
+      {
+        "row": 18,
+        "col": 0,
+        "hashtag": "#adm2+name",
+        "error_value": 0
+      },
+      {
+        "row": 19,
+        "col": 0,
+        "hashtag": "#adm2+name",
+        "error_value": 0
+      },
+      {
+        "row": 6,
+        "col": 3,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 11,
+        "col": 3,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 3,
+        "col": 8,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 6,
+        "col": 2,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 13,
+        "col": 4,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 18,
+        "col": 7,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 5,
+        "col": 10,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      }
+    ];
+    return Observable.of(locations);
+  }
+
+  private getData(): Observable<any> {
     const sample1 = [
       ['Région','Pcode Region','District','Pcode District','Communes','Pcode Communes','Fokontany','Pcode Fokontany','Personnes Décédées','Personnes Blessées','Maisons Détruites','Maisons Inondées','Maisons décoiffées','Personnes déplacées','Familles déplacées','H','F','Moins de 05 ans','Enceinte','Handicapés','Plus de 60 ans'],
       ['#adm1+name','#adm1+code','#adm2+name','#adm2+code','#adm3+name','#adm3+code','#adm4+name','#adm4+code','#affected+killed','#affected+injured','#affected+damaged','#affected+flooded','#affected+roofless','#affected+idps+individuals','#affected+idps+households','#affected+idps+individuals+m','#affected+idps+individuals+f','#affected+idps+individuals+infants','#affected+idps+individuals+f+pregnant','#affected+idps+individuals+vulnerable','#affected+idps+individuals+elderly'],
@@ -147,210 +318,7 @@ export class ImportComponent implements OnInit {
       ['Sava','MDG72','Antalaha','MDG72710','Ambalabe','MDG72710170','Ambalabe','MDG72710170001','0','1','0','0','0','0','0','0','0','0','0','0','0'],
       ['Sava','MDG72','Antalaha','MDG72710','Ampohibe','MDG72710050','Tanandava','MDG72710050012','0','1','0','0','0','0','0','0','0','0','0','0','0'],
     ];
-    const locations = [
-      {
-        "row": 18,
-        "col": 0,
-        "hashtag": "#adm2+name",
-        "error_value": 0
-      },
-      {
-        "row": 19,
-        "col": 0,
-        "hashtag": "#adm2+name",
-        "error_value": 0
-      },
-      {
-        "row": 6,
-        "col": 3,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 11,
-        "col": 3,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 3,
-        "col": 8,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 6,
-        "col": 2,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 13,
-        "col": 4,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 18,
-        "col": 7,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 5,
-        "col": 10,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      }
-    ];
-    const errorsXY = {}, errorsYX = {};
-    locations.forEach((val, index) => {
-      if (val.error_value === 0)
-        return;
-      let errorsX = errorsXY[val.col];
-      if (errorsX === undefined) {
-        errorsX = {};
-        errorsXY[val.col] = errorsX;
-      }
-      errorsX[val.row] = val.error_value;
-
-      let errorsY = errorsYX[val.row];
-      if (errorsY === undefined) {
-        errorsY = {};
-        errorsYX[val.row] = errorsY;
-      }
-      errorsY[val.col] = val.error_value;
-    });
-
-    function headerRenderer(instance, td, row, col, prop, value, cellProperties) {
-      Handsontable.renderers.TextRenderer.apply(this, arguments);
-      if (row === 0) {
-        td.style.fontWeight = 'bold';
-        td.style.color = 'green';
-        td.style.background = '#CEC';
-      } else {
-        td.style.fontWeight = 'bold';
-      }
-    }
-
-    function valueRenderer(instance, td, row, col, prop, value, cellProperties) {
-      Handsontable.renderers.TextRenderer.apply(this, arguments);
-
-      // if row contains negative number
-      if (errorsXY[col] !== undefined && errorsXY[col][row] !== undefined) {
-        // add class "negative"
-        td.style.color = 'red';
-      }
-
-      if (value === 'MDG72') {
-        td.style.fontStyle = 'italic';
-      }
-    }
-
-    let beforeKeyDown = (event: KeyboardEvent) => {
-      console.log("Key down");
-      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      event.preventDefault();
-
-      let selection = hotInstance.getSelected();
-      console.log(`Selection: ${selection}`);
-      const selectedCol:number = selection[0][1];
-      const selectedRow:number = selection[0][0];
-      let nextCol: number, nextRow: number;
-
-      let errorsX = errorsXY[selectedCol];
-      let errorsY = errorsYX[selectedRow];
-      if (event.keyCode == 38) {
-        // up arrow
-        console.log("up arrow");
-        for (let key in errorsX) {
-          const val: number = parseInt(key);
-          if ((val < selectedRow) && (nextRow === undefined || nextRow < val)) {
-            nextRow = val;
-          }
-        }
-        if (nextRow !== undefined) {
-          nextCol = selectedCol;
-        } else {
-          nextCol = selectedCol;
-        }
-      }
-      else if (event.keyCode == 40) {
-        // down arrow
-        console.log("down arrow");
-        for (let key in errorsX) {
-          const val: number = parseInt(key);
-          if ((val > selectedRow) && (nextRow === undefined || nextRow > val)) {
-            nextRow = val;
-          }
-        }
-        if (nextRow !== undefined) {
-          nextCol = selectedCol;
-        }
-      }
-      else if (event.keyCode == 37) {
-        // left arrow
-        console.log("left arrow");
-        nextCol = selectedCol - 1;
-      }
-      else if (event.keyCode == 39) {
-        // right arrow
-        console.log("right arrow");
-        nextCol = selectedCol + 1;
-      }
-
-      if (nextRow !== undefined && nextCol !== undefined) {
-        hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
-      } else {
-        if (nextCol !== undefined) {
-          hotInstance.selectColumns(nextCol);
-        }
-      }
-    };
-    this.tableSettings = {
-      data: sample1,
-      editor: false,
-      fillHandle: false,
-      copyPaste: false,
-      colHeaders: true,
-      fixedRowsTop: 2,
-      width: "100%",
-      selectionModeString: 'range',
-      height: 400,
-      afterSelection: function(r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) {
-        console.log(`Selected ${r}, ${c}, ${r2}, ${c2}`);
-      },
-      beforeKeyDown: beforeKeyDown,
-      cells: function(row, col, prop) {
-        let cellProperties: any = {};
-
-        if (row < 2) {
-          cellProperties.renderer = headerRenderer;
-        } else {
-          cellProperties.renderer = valueRenderer;
-        }
-
-        return cellProperties;
-      },
-      rowHeaders: true
-    };
-
-    // this.analyticsService.trackStepLoad(this.stepName, true, false, this.getWizardConfig().url, this.getWizardConfig().recipeUrl,
-    //   this.getWizardConfig().hxlCheckError ? this.getWizardConfig().hxlCheckError.errorSummary : null);
-  }
-
-  private updateIframeUrl() {
-    // const recipeUrl = encodeURIComponent(this.wizardConfigService.getWizardConfigData().recipeUrl);
-    // const url = encodeURIComponent(this._selectedUrl);
-    // const hxlPreviewUrl = environment.hxlPreview;
-    // const newUrl = `${hxlPreviewUrl}/show;url=${url};recipeUrl=${recipeUrl};toolsMode=true`;
-    // this.iFrameUrl = this.sanitizer.bypassSecurityTrustResourceUrl(newUrl);
-  }
-
-  getWizardConfig() {
-    // return this.wizardConfigService.getWizardConfigData();
+    return Observable.of(sample1);
   }
 
   updateSelectedUrl(newUrl: string) {
@@ -364,82 +332,5 @@ export class ImportComponent implements OnInit {
 
   changeSampleUrl(url) {
     this.selectedUrl = url;
-  }
-
-  iFrameLoaded() {
-    if (this.iFrameUrl) {
-      console.log('iFrame loaded!');
-      this.getEmbedUrl();
-      this.httpService.turnOffModal();
-    }
-  }
-
-  @HostListener('window:message', ['$event'])
-  onEmbedUrl($event) {
-    const action = $event.data;
-
-    const EMBED_URL = 'embedUrl:';
-    if (action && action.startsWith && action.startsWith(EMBED_URL)) {
-      if (window.parent) {
-        const url: string = action.slice(EMBED_URL.length);
-        // const parentOrigin = window.parent.location.href;
-        console.log(`EMBED URL: ${url}`);
-        const initMode = this.embedUrl == null;
-        this.shareUrl = url;
-        this.embedUrl = `<iframe src="${url}" style="border:none; width:100%; min-height:500px">`;
-
-        const snapService = environment.snapService;
-        const urlEncoded = encodeURIComponent(url);
-        const pngDownloadUrl = `${snapService}/png?viewport={"width": 1280, "height": 1}&url=${urlEncoded}`;
-        this.pngDownloadUrl = this.sanitizer.bypassSecurityTrustResourceUrl(pngDownloadUrl);
-        if (this.pngDownloadFlag) {
-          this.pngDownloadFlag = false;
-          setTimeout(() => {
-            window.open(pngDownloadUrl, '_blank');
-          }, 2);
-        }
-
-        if (!initMode) {
-          this.embedCode.nativeElement.focus();
-          this.embedCode.nativeElement.setSelectionRange(0, 0);
-          setTimeout(() => {
-            this.embedCode.nativeElement.setSelectionRange(0, this.embedCode.nativeElement.value.length);
-          }, 2);
-        }
-        return;
-      }
-    }
-  }
-
-  getEmbedUrl() {
-    const origin = window.location.origin;
-    const iFrame: HTMLIFrameElement = <HTMLIFrameElement> document.getElementById('quick-charts-iframe');
-    let iFrameOrigin = environment.hxlPreview;
-    if (!iFrameOrigin.startsWith('http')) {
-      iFrameOrigin = origin + iFrameOrigin;
-    }
-    iFrame.contentWindow.window.postMessage(`getEmbedUrl: ${origin}`, iFrameOrigin);
-  }
-
-  prepareSnapshot($event) {
-    this.pngDownloadFlag = true;
-    this.getEmbedUrl();
-  }
-
-  prepareShare($event, scrollto = false) {
-    const element = $event.target;
-    this.shareUrl = '';
-    this.embedUrl = '';
-    // element.setSelectionRange(0, 0);
-    // element.setSelectionRange(0, element.value.length);
-    element.scrollIntoView({behavior: 'smooth', block: 'end'});
-    setTimeout(() => {
-      this.getEmbedUrl();
-    }, 2);
-
-  }
-
-  changeMenuEmbed() {
-    this.menuEmbed = !this.menuEmbed;
   }
 }
