@@ -1,3 +1,4 @@
+import { HxlproxyService } from './../services/hxlproxy.service';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { GooglepickerDirective } from '../../common/googlepicker.directive';
 import { DropboxchooserDirective } from '../../common/dropboxchooser.directive';
@@ -40,11 +41,13 @@ export class ImportComponent implements OnInit {
   httpService: HttpService;
   embedUrl: string = null;
   errorsXY = {};
+  colToHash = {};
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
               http: Http, private sanitizer: DomSanitizer,
-              private hotRegisterer: HotTableRegisterer) {
+              private hotRegisterer: HotTableRegisterer,
+              private hxlProxyService: HxlproxyService) {
     this.httpService = <HttpService> http;
   }
 
@@ -70,19 +73,31 @@ export class ImportComponent implements OnInit {
     let dataObservable = this.getData();
     let locationsObservable = this.validateData();
     locationsObservable.subscribe((locations) => {
+      console.log('test');
       locations.forEach((val, index) => {
-        if (val.error_value === 0)
-          return;
-        let errorsX = this.errorsXY[val.col];
+        let errorsX = this.errorsXY[val.hashtag];
         if (errorsX === undefined) {
           errorsX = {};
-          this.errorsXY[val.col] = errorsX;
+          this.errorsXY[val.hashtag] = errorsX;
         }
-        errorsX[val.row] = val.error_value;
+        errorsX[val.row] = val.row;
       });
+      console.log('showing errors');
+      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
+      hotInstance.render();
+      hotInstance.loadData(this.data);
     });
     dataObservable.subscribe((data) => {
       this.data = data;
+
+      for (let i = 0; i < data[1].length; i++) {
+        this.colToHash[i] = data[1][i];
+      }
+      console.log('colToHash map is built');
+
+      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
+      hotInstance.loadData(data);
+      console.log('Data loaded');
     });
 
     let headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {
@@ -98,9 +113,14 @@ export class ImportComponent implements OnInit {
 
     let valueRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
-
+      const hash = this.colToHash[col];
+      if (hash) {
+        console.log('rendering WITH HASH');
+      } else {
+        console.log('rendering NO HASH')
+      }
       // if row contains negative number
-      if (this.errorsXY[col] !== undefined && this.errorsXY[col][row] !== undefined) {
+      if (this.errorsXY[hash] !== undefined && this.errorsXY[hash][row] !== undefined) {
         // add class "negative"
         td.style.color = 'red';
       }
@@ -123,7 +143,8 @@ export class ImportComponent implements OnInit {
       const selectedRow:number = selection[0][0];
       let nextCol: number, nextRow: number;
 
-      let errorsX = this.errorsXY[selectedCol];
+      const t = this.colToHash[selectedCol];
+      let errorsX = this.errorsXY[t];
       if (event.keyCode == 38) {
         // up arrow
         console.log("up arrow");
@@ -201,63 +222,78 @@ export class ImportComponent implements OnInit {
   }
 
   private validateData(): Observable<Array<any>> {
-    const locations = [
+    // const locations = [
+    //   {
+    //     "row": 18,
+    //     "col": 0,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 0
+    //   },
+    //   {
+    //     "row": 19,
+    //     "col": 0,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 0
+    //   },
+    //   {
+    //     "row": 6,
+    //     "col": 3,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 42
+    //   },
+    //   {
+    //     "row": 11,
+    //     "col": 3,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 42
+    //   },
+    //   {
+    //     "row": 3,
+    //     "col": 8,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 42
+    //   },
+    //   {
+    //     "row": 6,
+    //     "col": 2,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 42
+    //   },
+    //   {
+    //     "row": 13,
+    //     "col": 4,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 42
+    //   },
+    //   {
+    //     "row": 18,
+    //     "col": 7,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 42
+    //   },
+    //   {
+    //     "row": 5,
+    //     "col": 10,
+    //     "hashtag": "#adm2+name",
+    //     "error_value": 42
+    //   }
+    // ];
+    // return Observable.of(locations);
+
+    const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
+    const schema_url = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
+    const params = [
       {
-        "row": 18,
-        "col": 0,
-        "hashtag": "#adm2+name",
-        "error_value": 0
+        key: 'url',
+        value: url
       },
       {
-        "row": 19,
-        "col": 0,
-        "hashtag": "#adm2+name",
-        "error_value": 0
-      },
-      {
-        "row": 6,
-        "col": 3,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 11,
-        "col": 3,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 3,
-        "col": 8,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 6,
-        "col": 2,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 13,
-        "col": 4,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 18,
-        "col": 7,
-        "hashtag": "#adm2+name",
-        "error_value": 42
-      },
-      {
-        "row": 5,
-        "col": 10,
-        "hashtag": "#adm2+name",
-        "error_value": 42
+        key: 'schema_url',
+        value: schema_url
       }
     ];
-    return Observable.of(locations);
+    const validationResult = this.hxlProxyService.makeValidationCall(params);
+    return validationResult;
   }
 
   private getData(): Observable<any> {
@@ -318,7 +354,18 @@ export class ImportComponent implements OnInit {
       ['Sava','MDG72','Antalaha','MDG72710','Ambalabe','MDG72710170','Ambalabe','MDG72710170001','0','1','0','0','0','0','0','0','0','0','0','0','0'],
       ['Sava','MDG72','Antalaha','MDG72710','Ampohibe','MDG72710050','Tanandava','MDG72710050012','0','1','0','0','0','0','0','0','0','0','0','0','0'],
     ];
-    return Observable.of(sample1);
+    // return Observable.of(sample1);
+
+    const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
+    const params = [
+      {
+        key: 'url',
+        value: url
+      }
+    ];
+
+    const result = this.hxlProxyService.makeDataCall(params);
+    return result;
   }
 
   updateSelectedUrl(newUrl: string) {

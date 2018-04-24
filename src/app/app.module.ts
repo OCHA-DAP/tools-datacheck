@@ -1,3 +1,4 @@
+import { HxlproxyService } from './datacheck/services/hxlproxy.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -41,7 +42,8 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions) {
     HotTableModule.forRoot()
   ],
   providers: [
-    HTTP_SERVICE_PROVIDERS
+    HTTP_SERVICE_PROVIDERS,
+    HxlproxyService
   ],
   bootstrap: [AppComponent]
 })
