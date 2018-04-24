@@ -52,6 +52,7 @@ export class ImportComponent implements OnInit {
   selectedColumn: number;
   selectedRow: number;
   selectedTitle: string;
+  errorReport: any;
   colToHash = {};
   private bordersInitialised = false;
 
@@ -84,9 +85,10 @@ export class ImportComponent implements OnInit {
     });
     let dataObservable = this.getData();
     let locationsObservable = this.validateData();
-    locationsObservable.subscribe((locations) => {
+    locationsObservable.subscribe((report) => {
       console.log('test');
-      locations.forEach((val, index) => {
+      this.errorReport = report;
+      report.flatErrors.forEach((val, index) => {
         let errorsX = this.errorsXY[val.hashtag];
         if (errorsX === undefined) {
           errorsX = {};
@@ -245,7 +247,7 @@ export class ImportComponent implements OnInit {
     };
   }
 
-  private validateData(): Observable<Array<any>> {
+  private validateData(): Observable<any> {
 
     const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
     const schema_url = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';

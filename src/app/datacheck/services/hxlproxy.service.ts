@@ -8,12 +8,13 @@ export class HxlproxyService {
 
   constructor(private http: Http) { }
 
-  public makeValidationCall(params: { key: string, value: string }[]): Observable<any[]> {
+  public makeValidationCall(params: { key: string, value: string }[]): Observable<any> {
     const mapFunction = (response: Response) => {
       const json = response.json();
       let locations = [];
       for (let i = 0; i < json.issues.length; i++) {
         const issue = json.issues[i];
+        issue.locations.sort( (el1, el2) => el1.row - el2.row );
         issue.locations.forEach(element => {
           element.type = issue.description;
           element.row += 2;
@@ -21,7 +22,8 @@ export class HxlproxyService {
         });
         locations = locations.concat(issue.locations);
       }
-      return locations;
+      json['flatErrors'] = locations;
+      return json;
     };
     const serverUrl = `${environment['hxlProxyValidate']}?`;
     return this.makeCallToHxlProxy<any[]>(serverUrl, params, mapFunction);
