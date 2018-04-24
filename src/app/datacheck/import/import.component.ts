@@ -218,15 +218,7 @@ export class ImportComponent implements OnInit {
         nextCol = selectedCol + 1;
       }
 
-      if (nextRow !== undefined && nextCol !== undefined) {
-        this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
-        this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
-      } else {
-        if (nextCol !== undefined) {
-          this.hotInstance.selectColumns(nextCol);
-          this.hotInstance.scrollViewportTo(1, nextCol, true, true);
-        }
-      }
+      this.tableJumpTo(nextRow, nextCol);
     };
     let afterSelection = (r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) => {
       this.initBorders();
@@ -241,7 +233,8 @@ export class ImportComponent implements OnInit {
         this.selectedColumn = c;
         this.selectedRow = r;
       }
-      this.selectedColumnName = this.hotInstance.getColHeader(this.selectedColumn);
+      let colHeader = this.hotInstance.getColHeader(this.selectedColumn);
+      this.selectedColumnName = colHeader[0];
       this.updateErrorPopup();
     };
     this.tableSettings = {
@@ -269,6 +262,18 @@ export class ImportComponent implements OnInit {
       },
       rowHeaders: true
     };
+  }
+
+  private tableJumpTo(nextCol: number, nextRow: number) {
+    if (nextRow !== undefined && nextCol !== undefined) {
+      this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
+      this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
+    } else {
+      if (nextCol !== undefined) {
+        this.hotInstance.selectColumns(nextCol);
+        this.hotInstance.scrollViewportTo(1, nextCol, true, true);
+      }
+    }
   }
 
   private validateData(): Observable<any> {
@@ -395,5 +400,6 @@ export class ImportComponent implements OnInit {
   jumpTo(hashtag: string, row: number) {
     this.selectedColumn = this.hashToCol[hashtag];
     this.selectedRow = row;
+    this.tableJumpTo(this.selectedColumn, this.selectedRow);
   }
 }
