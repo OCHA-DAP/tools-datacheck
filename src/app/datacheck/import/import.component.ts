@@ -56,6 +56,7 @@ export class ImportComponent implements OnInit {
   selectedTitle: string;
   errorReport: any;
   colToHash = {};
+  hashToCol = {};
   private bordersInitialised = false;
 
   constructor(private router: Router, private route: ActivatedRoute,
@@ -95,6 +96,7 @@ export class ImportComponent implements OnInit {
 
       for (let i = 0; i < data[1].length; i++) {
         this.colToHash[i] = data[1][i];
+        this.hashToCol[data[1][i]] = i;
       }
       console.log('colToHash map is built');
 
