@@ -8,6 +8,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Http } from '@angular/http';
 import { environment } from '../../../environments/environment';
 import * as Handsontable from 'handsontable';
+import { HotTableRegisterer } from '@handsontable/angular';
 
 @Component({
   selector: 'app-import',
@@ -21,6 +22,7 @@ export class ImportComponent implements OnInit {
   hxlCheckError: any = null;
   _selectedUrl = '';
   tableSettings: any;
+  tableId: string = 'table1';
   data: any[] = Handsontable.helper.createSpreadsheetData(10, 10);
   sampleData = [
     {
@@ -51,7 +53,8 @@ export class ImportComponent implements OnInit {
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
-              http: Http, private sanitizer: DomSanitizer) {
+              http: Http, private sanitizer: DomSanitizer,
+              private hotRegisterer: HotTableRegisterer) {
     this.httpService = <HttpService> http;
   }
 
@@ -144,6 +147,80 @@ export class ImportComponent implements OnInit {
       ['Sava','MDG72','Antalaha','MDG72710','Ambalabe','MDG72710170','Ambalabe','MDG72710170001','0','1','0','0','0','0','0','0','0','0','0','0','0'],
       ['Sava','MDG72','Antalaha','MDG72710','Ampohibe','MDG72710050','Tanandava','MDG72710050012','0','1','0','0','0','0','0','0','0','0','0','0','0'],
     ];
+    const locations = [
+      {
+        "row": 18,
+        "col": 0,
+        "hashtag": "#adm2+name",
+        "error_value": 0
+      },
+      {
+        "row": 19,
+        "col": 0,
+        "hashtag": "#adm2+name",
+        "error_value": 0
+      },
+      {
+        "row": 6,
+        "col": 3,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 11,
+        "col": 3,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 3,
+        "col": 8,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 6,
+        "col": 2,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 13,
+        "col": 4,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 18,
+        "col": 7,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      },
+      {
+        "row": 5,
+        "col": 10,
+        "hashtag": "#adm2+name",
+        "error_value": 42
+      }
+    ];
+    const errorsXY = {}, errorsYX = {};
+    locations.forEach((val, index) => {
+      if (val.error_value === 0)
+        return;
+      let errorsX = errorsXY[val.col];
+      if (errorsX === undefined) {
+        errorsX = {};
+        errorsXY[val.col] = errorsX;
+      }
+      errorsX[val.row] = val.error_value;
+
+      let errorsY = errorsYX[val.row];
+      if (errorsY === undefined) {
+        errorsY = {};
+        errorsYX[val.row] = errorsY;
+      }
+      errorsY[val.col] = val.error_value;
+    });
 
     function headerRenderer(instance, td, row, col, prop, value, cellProperties) {
       Handsontable.renderers.TextRenderer.apply(this, arguments);
@@ -160,7 +237,7 @@ export class ImportComponent implements OnInit {
       Handsontable.renderers.TextRenderer.apply(this, arguments);
 
       // if row contains negative number
-      if (parseInt(value, 10) < 50) {
+      if (errorsXY[col] !== undefined && errorsXY[col][row] !== undefined) {
         // add class "negative"
         td.style.color = 'red';
       }
@@ -170,6 +247,68 @@ export class ImportComponent implements OnInit {
       }
     }
 
+    let beforeKeyDown = (event: KeyboardEvent) => {
+      console.log("Key down");
+      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      event.preventDefault();
+
+      let selection = hotInstance.getSelected();
+      console.log(`Selection: ${selection}`);
+      const selectedCol:number = selection[0][1];
+      const selectedRow:number = selection[0][0];
+      let nextCol: number, nextRow: number;
+
+      let errorsX = errorsXY[selectedCol];
+      let errorsY = errorsYX[selectedRow];
+      if (event.keyCode == 38) {
+        // up arrow
+        console.log("up arrow");
+        for (let key in errorsX) {
+          const val: number = parseInt(key);
+          if ((val < selectedRow) && (nextRow === undefined || nextRow < val)) {
+            nextRow = val;
+          }
+        }
+        if (nextRow !== undefined) {
+          nextCol = selectedCol;
+        } else {
+          nextCol = selectedCol;
+        }
+      }
+      else if (event.keyCode == 40) {
+        // down arrow
+        console.log("down arrow");
+        for (let key in errorsX) {
+          const val: number = parseInt(key);
+          if ((val > selectedRow) && (nextRow === undefined || nextRow > val)) {
+            nextRow = val;
+          }
+        }
+        if (nextRow !== undefined) {
+          nextCol = selectedCol;
+        }
+      }
+      else if (event.keyCode == 37) {
+        // left arrow
+        console.log("left arrow");
+        nextCol = selectedCol - 1;
+      }
+      else if (event.keyCode == 39) {
+        // right arrow
+        console.log("right arrow");
+        nextCol = selectedCol + 1;
+      }
+
+      if (nextRow !== undefined && nextCol !== undefined) {
+        hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
+      } else {
+        if (nextCol !== undefined) {
+          hotInstance.selectColumns(nextCol);
+        }
+      }
+    };
     this.tableSettings = {
       data: sample1,
       editor: false,
@@ -178,10 +317,12 @@ export class ImportComponent implements OnInit {
       colHeaders: true,
       fixedRowsTop: 2,
       width: "100%",
+      selectionModeString: 'range',
       height: 400,
       afterSelection: function(r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) {
         console.log(`Selected ${r}, ${c}, ${r2}, ${c2}`);
       },
+      beforeKeyDown: beforeKeyDown,
       cells: function(row, col, prop) {
         let cellProperties: any = {};
 

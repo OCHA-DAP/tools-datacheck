@@ -38,7 +38,7 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions) {
     HttpModule,
     AppRoutingModule,
     FormsModule,
-    HotTableModule
+    HotTableModule.forRoot()
   ],
   providers: [
     HTTP_SERVICE_PROVIDERS
