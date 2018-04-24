@@ -2,7 +2,15 @@ import { HxlproxyService } from './../services/hxlproxy.service';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { GooglepickerDirective } from '../../common/googlepicker.directive';
 import { DropboxchooserDirective } from '../../common/dropboxchooser.directive';
-import { Component, OnInit, ChangeDetectorRef, ViewChild, HostListener, ElementRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectorRef,
+  ViewChild,
+  HostListener,
+  ElementRef,
+  AfterViewInit
+} from '@angular/core';
 import { AnalyticsService } from '../../common/analytics.service';
 import { HttpService } from '../../shared/http.service';
 import { DomSanitizer} from '@angular/platform-browser';
@@ -41,7 +49,11 @@ export class ImportComponent implements OnInit {
   httpService: HttpService;
   embedUrl: string = null;
   errorsXY = {};
+  selectedColumn: number;
+  selectedRow: number;
+  selectedTitle: string;
   colToHash = {};
+  private bordersInitialised = false;
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
@@ -103,14 +115,13 @@ export class ImportComponent implements OnInit {
     let headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
       if (row === 0) {
-        td.style.fontWeight = 'bold';
-        td.style.color = 'green';
-        td.style.background = '#CEC';
+        // td.style.fontWeight = 'bold';
+        // td.style.color = 'green';
+        // td.style.background = '#CEC';
       } else {
         td.style.fontWeight = 'bold';
       }
     };
-
     let valueRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
       const hash = this.colToHash[col];
@@ -128,8 +139,7 @@ export class ImportComponent implements OnInit {
       if (value === 'MDG72') {
         td.style.fontStyle = 'italic';
       }
-    }
-
+    };
     let beforeKeyDown = (event: KeyboardEvent) => {
       console.log("Key down");
       const hotInstance = this.hotRegisterer.getInstance(this.tableId);
@@ -186,11 +196,27 @@ export class ImportComponent implements OnInit {
 
       if (nextRow !== undefined && nextCol !== undefined) {
         hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
+        hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
       } else {
         if (nextCol !== undefined) {
           hotInstance.selectColumns(nextCol);
+          hotInstance.scrollViewportTo(1, nextCol, true, true);
         }
       }
+    };
+    let afterSelection = (r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) => {
+      this.initBorders();
+      console.log(`Selected ${r}, ${c}, ${r2}, ${c2}`);
+      if ((c2-c)*(r2-r) > 1) {
+        //column selected
+        this.selectedColumn = c;
+        this.selectedRow = null;
+      } else {
+        //cell selected
+        this.selectedColumn = c;
+        this.selectedRow = r;
+      }
+      this.updateErrorPopup();
     };
     this.tableSettings = {
       data: this.data,
@@ -202,9 +228,7 @@ export class ImportComponent implements OnInit {
       width: "100%",
       selectionModeString: 'range',
       height: 400,
-      afterSelection: function(r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) {
-        console.log(`Selected ${r}, ${c}, ${r2}, ${c2}`);
-      },
+      afterSelection: afterSelection,
       beforeKeyDown: beforeKeyDown,
       cells: function(row, col, prop) {
         let cellProperties: any = {};
@@ -379,5 +403,40 @@ export class ImportComponent implements OnInit {
 
   changeSampleUrl(url) {
     this.selectedUrl = url;
+  }
+
+  initBorders() {
+    let colorBorders = function () {
+      let borders = document.querySelectorAll('.handsontable .wtBorder');
+      for (let i = 0; i < borders.length; i++) {
+        let border = borders[i];
+        border.style.backgroundColor = '#f2645a';
+        if (border.style.width === "1px") {
+          border.style.width = "2px";
+        }
+        if (border.style.heigth === "1px") {
+          border.style.heigth = "2px";
+        }
+      }
+    };
+    if (!this.bordersInitialised) {
+      this.bordersInitialised = true;
+      setTimeout(colorBorders, 50);
+    }
+  }
+
+  private updateErrorPopup() {
+    if (this.selectedColumn !== null){
+      let errorsX = this.errorsXY[this.selectedColumn];
+      this.selectedTitle = this.data[0][this.selectedColumn];
+      if (errorsX !== undefined) {
+        if (this.selectedRow !== null) {
+          let error = errorsX[this.selectedRow];
+          this.selectedTitle = this.data[this.selectedRow][this.selectedColumn];
+        }
+      }
+    } else {
+      this.selectedTitle = null;
+    }
   }
 }

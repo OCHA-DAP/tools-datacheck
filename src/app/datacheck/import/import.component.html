@@ -64,14 +64,79 @@
     <div class="paddingDoubleLRHack">
       <div class="row step-content">
         <div class="col-xs-12">
-          <div class="title">Preview data:</div>
+          <div class="title">Select diagnostics:</div>
+          <div>
+            Choose the ways to check your data.
+          </div>
+          <div>
+            Data source: <a target="_blank" [href]="selectedUrl">{{ selectedUrl }}</a>
+          </div>
         </div>
+        <div class="col-xs-12" style="height: 30px; background-color: #eee;">&nbsp;</div>
         <div class="col-xs-12">
-          <div class="quick-charts-render">
-            <!--<iframe #quickChartsIFrame id="quick-charts-iframe" [src]="iFrameUrl" (load)="iFrameLoaded()"-->
-                    <!--style="border:none; width:100%; min-height:520px">-->
-            <!--</iframe>-->
-            <hot-table [hotId]="tableId" [settings]="tableSettings"></hot-table>
+          <div class="row">
+            <div class="col-xs-4">
+              <div class="filters">
+                <div class="filters-title">
+                  <a>Select all</a><a>Clear all</a>
+                </div>
+                <div class="filters-content">
+                  <ul>
+                    <li>
+                      <label><input type="checkbox"> Check P-Codes</label>
+                    </li>
+                    <li>
+                      <label><input type="checkbox"> Check admin unit names</label>
+                    </li>
+                    <li>
+                      <label><input type="checkbox"> Check data types (numbers, strings)</label>
+                    </li>
+                    <li>
+                      <label><input type="checkbox"> Compare to custom list</label>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-xs-8">
+              <div class="error-report">
+                <div class="error-breadcrumb">
+                  <ul>
+                    <li>Report summary</li>
+                    <li class="active">Column report</li>
+                  </ul>
+                </div>
+                <div class="error-title">
+                  {{ selectedTitle }}
+                </div>
+                <div class="row ">
+                  <div class="col-xs-4 section">
+                    <div class="section-title">Issues</div>
+                    <div>8 unrecognised place names</div>
+                  </div>
+                  <div class="col-xs-8 section">
+                    <div class="section-title">Cell</div>
+                    <div>
+                      <a class="cell-href">A22</a>
+                      <a class="cell-href">A54</a>
+                      <a class="cell-href">A59</a>
+                      <a class="cell-href">A62</a>
+                    </div>
+                  </div>
+                </div>
+                <hr>
+                <div class="row navigation">
+                  <div class="col-xs-4 previous"><a>« Previous column</a></div>
+                  <div class="col-xs-4 count"> 1 of 67 </div>
+                  <div class="col-xs-4 next"><a>Next column »</a></div>
+                </div>
+              </div>
+
+
+              <div class="">
+                <hot-table [hotId]="tableId" [settings]="tableSettings"></hot-table>
+              </div>
+            </div>
           </div>
         </div>
       </div>

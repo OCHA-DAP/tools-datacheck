@@ -99,3 +99,135 @@
   }
 }
 
+.error-report {
+  @errorReportPadding: 30px;
+  @navigationMargin: 15px;
+  padding: @errorReportPadding @errorReportPadding @navigationMargin;
+  background-color: @darkGrayColor;
+  border-radius: 5px;
+  margin-bottom: 30px;
+  color: @whiteColor;
+  hr {
+    margin: @navigationMargin -@errorReportPadding;
+    border-top-color: @grayColor;
+  }
+  .error-breadcrumb {
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      text-transform: uppercase;
+      .sourceSansProFont(300, 12px);
+      color: @whiteColor;
+
+      li ~ li {
+        &:before {
+          content: "»";
+          margin: 0 5px;
+          .sourceSansProFont(300, 12px);
+        }
+      }
+      li{
+        display: inline;
+        &.active {
+          .sourceSansProFont(700, 12px);
+        }
+      }
+    }
+  }
+
+  .error-title {
+    .sourceSansProFont(700, 18px);
+    margin: 5px 0 20px;
+  }
+  .section {
+    .sourceSansProFont(400, 14px);
+    min-height: 100px;
+
+    .section-title {
+      color: @grayColor;
+      text-transform: uppercase;
+      .sourceSansProFont(300, 14px);
+    }
+    .cell-href {
+      color: @orangeColor;
+      text-decoration: underline;
+      cursor: pointer;
+
+      &:after {
+        content: ',';
+        color: @whiteColor;
+      }
+      &:last-child {
+        &:after {
+          content: '';
+        }
+      }
+    }
+  }
+  .navigation {
+    .sourceSansProFont(700, 14px);
+    .letter-spacing-3();
+
+    a {
+      color: @whiteColor;
+      cursor: pointer;
+    }
+    .previous {
+      text-align: left;
+      text-transform: uppercase;
+    }
+    .count {
+      text-align: center;
+      font-weight: 400;
+    }
+    .next {
+      text-align: right;
+      text-transform: uppercase;
+    }
+  }
+}
+
+
+/deep/ .handsontable {
+  tbody th.ht__highlight, thead th.ht__highlight {
+    background-color: @lightGrayColor;
+  }
+
+  td.area:before, td.area-1:before, td.area-2:before, td.area-3:before, td.area-4:before, td.area-5:before, td.area-6:before, td.area-7:before {
+    background-color: transparent;
+  }
+  .wtBorder {
+    background-color: @orangeColor !important;
+  }
+}
+
+.filters {
+  @filtersPadding: 15px;
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+
+  .filters-title {
+    background-color: @extraLightBlueColor;
+    border-bottom: 1px solid @lightGrayColor;
+    padding: @filtersPadding;
+  }
+
+  .filters-content {
+    background-color: @whiteColor;
+    padding: @filtersPadding;
+    ul {
+      padding: 0; margin: 0;
+      list-style: none;
+    }
+  }
+
+  a {
+    & ~ a {
+      &:before {
+        content: "|";
+        margin: 0 10px;
+      }
+    }
+  }
+}
