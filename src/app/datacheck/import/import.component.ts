@@ -30,6 +30,8 @@ export class ImportComponent implements OnInit {
   sampleUrlSelected = true;
   hxlCheckError: any = null;
   _selectedUrl = '';
+  _selectedRecipeUrl = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
+
   tableSettings: any;
   tableId: string = 'table1';
   data: any[] = Handsontable.helper.createSpreadsheetData(10, 10);
@@ -70,21 +72,38 @@ export class ImportComponent implements OnInit {
 
   set selectedUrl(selectedUrl: string) {
     this._selectedUrl = selectedUrl;
-    this.embedUrl = null;
+    // this.embedUrl = null;
+    this.reloadDataAndValidate();
   }
 
-  ngOnInit() {
-    this._selectedUrl = this.sampleData[0].url;
-    this.route.paramMap.subscribe((params: ParamMap) => {
-      this.httpService.turnOnModal();
-      const urlParam = params.get('url');
-      if (urlParam) {
-        this._selectedUrl = urlParam;
-        this.sampleUrlSelected = false;
+  get selectedRecipeUrl() {
+    return this._selectedRecipeUrl;
+  }
+
+  set selectedRecipeUrl(selectedRecipeUrl: string) {
+    this._selectedRecipeUrl = selectedRecipeUrl;
+
+    this.reloadDataAndValidate();
+  }
+
+  protected reloadDataAndValidate() {
+    this.errorsXY = {};
+
+    const dataObservable = this.getData();
+    dataObservable.subscribe((data) => {
+      this.data = data;
+
+      for (let i = 0; i < data[1].length; i++) {
+        this.colToHash[i] = data[1][i];
       }
+      console.log('colToHash map is built');
+
+      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
+      hotInstance.loadData(data);
+      console.log('Data loaded');
     });
-    let dataObservable = this.getData();
-    let locationsObservable = this.validateData();
+
+    const locationsObservable = this.validateData();
     locationsObservable.subscribe((report) => {
       console.log('test');
       this.errorReport = report;
@@ -101,18 +120,19 @@ export class ImportComponent implements OnInit {
       hotInstance.render();
       hotInstance.loadData(this.data);
     });
-    dataObservable.subscribe((data) => {
-      this.data = data;
+  }
 
-      for (let i = 0; i < data[1].length; i++) {
-        this.colToHash[i] = data[1][i];
+  ngOnInit() {
+    this._selectedUrl = this.sampleData[0].url;
+    this.route.paramMap.subscribe((params: ParamMap) => {
+      this.httpService.turnOnModal();
+      const urlParam = params.get('url');
+      if (urlParam) {
+        this._selectedUrl = urlParam;
+        this.sampleUrlSelected = false;
       }
-      console.log('colToHash map is built');
-
-      const hotInstance = this.hotRegisterer.getInstance(this.tableId);
-      hotInstance.loadData(data);
-      console.log('Data loaded');
     });
+    this.reloadDataAndValidate();
 
     let headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
@@ -249,8 +269,10 @@ export class ImportComponent implements OnInit {
 
   private validateData(): Observable<any> {
 
-    const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
-    const schema_url = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
+    // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
+    const url = this.selectedUrl;
+    // const schema_url = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
+    const schemaUrl = this.selectedRecipeUrl;
     const params = [
       {
         key: 'url',
@@ -258,7 +280,7 @@ export class ImportComponent implements OnInit {
       },
       {
         key: 'schema_url',
-        value: schema_url
+        value: schemaUrl
       }
     ];
     const validationResult = this.hxlProxyService.makeValidationCall(params);
@@ -266,7 +288,8 @@ export class ImportComponent implements OnInit {
   }
 
   private getData(): Observable<any> {
-    const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
+    // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
+    const url = this.selectedUrl;
     const params = [
       {
         key: 'url',

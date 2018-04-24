@@ -57,7 +57,11 @@
     <div *ngIf="!sampleUrlSelected" class="col-xs-9 source-custom-url">
       <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
       <label for="source-custom-url-field">Enter URL</label>
-      <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field" placeholder="eg. http://example.com/population-jan-2011.json">
+      <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field"
+        placeholder="eg. http://example.com/population-jan-2011.json">
+      <label style="padding-top: 10px;" for="source-custom-recipe-url-field">Enter Recipe</label>
+      <input [(ngModel)]="selectedRecipeUrl" name="selectedRecipeUrl" class="wizard-input" id="source-custom-recipe-url-field"
+        placeholder="eg. http://example.com/population-jan-2011.json">
     </div>
   </div>
   <div class="paddingDoubleRowHack customize-section">
