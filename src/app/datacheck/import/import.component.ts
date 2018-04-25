@@ -36,6 +36,7 @@ export class ImportComponent implements OnInit {
   tableSettings: any;
   tableId: string = 'table1';
   data: any[] = Handsontable.helper.createSpreadsheetData(10, 10);
+  errorList: any[];
 
   sampleData = [
     {
@@ -79,7 +80,8 @@ export class ImportComponent implements OnInit {
               http: Http, private sanitizer: DomSanitizer,
               private hotRegisterer: HotTableRegisterer,
               private hxlProxyService: HxlproxyService,
-              private configService: ConfigService) {
+              private configService: ConfigService,
+              private elRef:ElementRef) {
 
     this.httpService = <HttpService> http;
   }
@@ -129,6 +131,7 @@ export class ImportComponent implements OnInit {
       console.log('showing errors');
       this.hotInstance.render();
       this.hotInstance.loadData(this.data);
+      this.updateErrorList();
     });
   }
 
@@ -275,7 +278,7 @@ export class ImportComponent implements OnInit {
 
   private tableJumpTo(nextCol: number, nextRow: number) {
     if (nextRow !== undefined && nextCol !== undefined) {
-      this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
+      this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, true);
       this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
     } else {
       if (nextCol !== undefined) {
@@ -354,6 +357,7 @@ export class ImportComponent implements OnInit {
   }
 
   private updateErrorPopup() {
+    this.updateErrorList();
     if (this.selectedColumn !== null) {
       let errorsX = this.errorsXY[this.selectedColumn];
       this._selectedTitle = this.data[0][this.selectedColumn];
@@ -369,13 +373,13 @@ export class ImportComponent implements OnInit {
   }
 
   get hotInstance(): Handsontable {
-    if (!this._hotInstance) {
+    // if (!this._hotInstance) {
       this._hotInstance = this.hotRegisterer.getInstance(this.tableId);
-    }
+    // }
     return this._hotInstance;
   }
 
-  get errorList() {
+  private updateErrorList() {
     if (this.errorReport){
       let issues: any[] = JSON.parse(JSON.stringify(this.errorReport.issues));
       if (this.selectedColumn != null) {
@@ -391,9 +395,12 @@ export class ImportComponent implements OnInit {
           return locations.length > 0;
         });
       }
-      return issues;
+      this.errorList = issues;
+    } else {
+      this.errorList = [];
     }
-    return [];
+
+    return this.errorList;
   }
 
   getColHeaderFromCol(col: number) {
@@ -411,5 +418,19 @@ export class ImportComponent implements OnInit {
     this.selectedColumn = col;
     this.selectedRow = row;
     this.tableJumpTo(this.selectedColumn, this.selectedRow);
+    setTimeout(() => {
+      let currentCell = this.elRef.nativeElement.querySelector('hot-table');
+      currentCell.scrollIntoView();
+    }, 10);
+  }
+
+  resetSelection(column: boolean, row: boolean){
+    if (column) {
+      this.selectedColumn = null;
+    }
+    if (row) {
+      this.selectedRow = null;
+    }
+    this.updateErrorList();
   }
 }

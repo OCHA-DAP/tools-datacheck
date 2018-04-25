@@ -106,8 +106,8 @@
               <div class="error-report">
                 <div class="error-breadcrumb">
                   <ul>
-                    <li [ngClass]="{'active': selectedColumn == null }" (click)="selectedColumn = null; selectedRow = null;">Report summary</li>
-                    <li *ngIf="selectedColumn != null" [ngClass]="{'active': selectedRow == null }" (click)="selectedRow = null;" class="active">Column {{ selectedColumnName }}</li>
+                    <li [ngClass]="{'active': selectedColumn == null }" (click)="resetSelection(true, true);">Report summary</li>
+                    <li *ngIf="selectedColumn != null" [ngClass]="{'active': selectedRow == null }" (click)="resetSelection(false, true);" class="active">Column {{ selectedColumnName }}</li>
                     <li *ngIf="selectedRow != null" class="active">Cell {{ (selectedRow+1) }}</li>
                   </ul>
                 </div>
