@@ -126,7 +126,7 @@
                   <div class="col-xs-6 section">
                     <div>{{ error.location_count }} {{ error.description }}</div>
                   </div>
-                  <div class="col-xs-6 section">
+                  <div class="col-xs-6 section scrollable">
                     <div>
                       <a *ngFor="let location of error.locations" class="cell-href" (click)="jumpTo(location.col, location.row)">{{ getColHeaderFromCol(location.col) + (location.row + 1)}}</a>
                     </div>
