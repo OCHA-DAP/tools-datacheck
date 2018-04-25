@@ -1,6 +1,8 @@
 export const environment = {
   production: true,
-  hxlProxy: '/hxlproxy/data.json',
+  // hxlProxy: '/hxlproxy/data.json',
+  hxlProxy: 'https://beta.proxy.hxlstandard.org/data.json',
+  hxlProxyValidate: 'https://beta.proxy.hxlstandard.org/data/validate.json',
   hxlCheck: '/hxlproxy/hxl-test.json',
   hxlPreview: '/quickcharts/app',
   snapService: '/snap',
