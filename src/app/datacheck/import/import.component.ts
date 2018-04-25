@@ -226,7 +226,7 @@ export class ImportComponent implements OnInit {
         nextCol = selectedCol + 1;
       }
 
-      this.tableJumpTo(nextRow, nextCol);
+      this.tableJumpTo(nextCol, nextRow);
     };
     let afterSelection = (r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) => {
       this.initBorders();
@@ -276,12 +276,15 @@ export class ImportComponent implements OnInit {
     if (nextRow !== undefined && nextCol !== undefined) {
       this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
       this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
+      let cell: HTMLElement = <HTMLElement> this.hotInstance.getCell(nextRow, nextCol);
+      cell.focus();
     } else {
       if (nextCol !== undefined) {
         this.hotInstance.selectColumns(nextCol);
         this.hotInstance.scrollViewportTo(1, nextCol, true, true);
       }
     }
+
   }
 
   private validateData(): Observable<any> {
