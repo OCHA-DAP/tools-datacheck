@@ -10,7 +10,7 @@ import {
   ViewChild,
   HostListener,
   ElementRef,
-  AfterViewInit
+  AfterViewInit, Renderer
 } from '@angular/core';
 import { AnalyticsService } from '../../common/analytics.service';
 import { HttpService } from '../../shared/http.service';
@@ -36,7 +36,15 @@ export class ImportComponent implements OnInit {
   tableSettings: any;
   tableId: string = 'table1';
   data: any[] = Handsontable.helper.createSpreadsheetData(10, 10);
+
   sampleData = [
+    {
+      'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
+      'name': 'Alex\'s dataset',
+      'description': 'Lorem ipsum ... ',
+      'url': 'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx',
+      'org': 'IFRC'
+    },
     {
       'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
       'name': 'Test dataset (provided by Dan)',
@@ -46,7 +54,7 @@ export class ImportComponent implements OnInit {
       'url': 'https://data.humdata.org/dataset/94b6d7f8-9b6d-4bca-81d7-6abb83edae16/resource/c7fb99a5-43ec-4b3f-b8db-' +
       '935640c75aeb/download/assesment_data_crm_05april2017.xlsx',
       'org': 'IFRC',
-    },
+    }
   ];
 
   httpService: HttpService;
@@ -61,6 +69,11 @@ export class ImportComponent implements OnInit {
   private bordersInitialised = false;
   private _hotInstance: Handsontable;
   selectedColumnName: string;
+  showFilters = false;
+
+  @ViewChild('hotTable')
+  private hotTableEl: ElementRef;
+
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
@@ -166,7 +179,7 @@ export class ImportComponent implements OnInit {
       // if row contains negative number
       if (this.errorsXY[hash] !== undefined && this.errorsXY[hash][row] !== undefined) {
         // add class "negative"
-        td.style.color = 'red';
+        td.style.backgroundColor = '#f9ccc9';
       }
 
       if (value === 'MDG72') {
@@ -254,7 +267,7 @@ export class ImportComponent implements OnInit {
       fixedRowsTop: 2,
       width: "100%",
       selectionModeString: 'range',
-      height: 400,
+      height: 600,
       afterSelection: afterSelection,
       beforeKeyDown: beforeKeyDown,
       cells: function(row, col, prop) {
@@ -276,8 +289,6 @@ export class ImportComponent implements OnInit {
     if (nextRow !== undefined && nextCol !== undefined) {
       this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, false);
       this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
-      let cell: HTMLElement = <HTMLElement> this.hotInstance.getCell(nextRow, nextCol);
-      cell.focus();
     } else {
       if (nextCol !== undefined) {
         this.hotInstance.selectColumns(nextCol);
@@ -392,7 +403,6 @@ export class ImportComponent implements OnInit {
           return locations.length > 0;
         });
       }
-      console.log(issues);
       return issues;
     }
     return [];
@@ -403,9 +413,10 @@ export class ImportComponent implements OnInit {
   }
 
   get selectedTitle(): string {
-    if (this.selectedColumn)
+    if (this.selectedColumn != null)
       return this._selectedTitle;
-    return 'XYZ problems found';
+    const text = this.errorReport ? this.errorReport.stats.total + ' problems found': 'Loading report';
+    return text;
   }
 
   jumpTo(hashtag: string, row: number) {
