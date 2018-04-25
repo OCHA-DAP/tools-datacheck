@@ -115,18 +115,18 @@
                   {{ selectedTitle }}
                 </div>
                 <div class="row">
-                  <div class="col-xs-6 section">
+                  <div class="col-xs-4 section">
                     <div class="section-title">Issues</div>
                   </div>
-                  <div class="col-xs-6 section">
+                  <div class="col-xs-8 section">
                     <div class="section-title">Cell</div>
                   </div>
                 </div>
                 <div *ngFor="let error of errorList" class="row section-spacing">
-                  <div class="col-xs-6 section">
+                  <div class="col-xs-4 section">
                     <div>{{ error.location_count }} {{ error.description }}</div>
                   </div>
-                  <div class="col-xs-6 section scrollable">
+                  <div class="col-xs-8 section scrollable">
                     <div>
                       <a *ngFor="let location of error.locations" class="cell-href" (click)="jumpTo(location.col, location.row)">{{ getColHeaderFromCol(location.col) + (location.row + 1)}}</a>
                     </div>
@@ -134,9 +134,17 @@
                 </div>
                 <hr>
                 <div class="row navigation">
-                  <div class="col-xs-4 previous"><a>« Previous column</a></div>
-                  <div class="col-xs-4 count"> 1 of 67 </div>
-                  <div class="col-xs-4 next"><a>Next column »</a></div>
+                  <div *ngIf="selectedColumn != null">
+                    <div class="col-xs-4 previous"><a *ngIf="selectedColumn > 0" (click)="incrementColumn(-1)">« Previous column</a></div>
+                    <div class="col-xs-4 count"> {{ selectedColumn + 1 }} of {{ numberOfColumns }} </div>
+                    <div class="col-xs-4 next"><a *ngIf="selectedColumn < numberOfColumns - 1" (click)="incrementColumn(1)">Next column »</a></div>
+                  </div>
+                  <div *ngIf="selectedColumn == null">
+                    <div class="col-xs-4 previous"></div>
+                    <div class="col-xs-4 count"> </div>
+                    <div class="col-xs-4 next" (click)="reviewErrors()"><a>Review errors »</a></div>
+                  </div>
+
                 </div>
               </div>
 

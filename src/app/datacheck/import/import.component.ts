@@ -61,6 +61,7 @@ export class ImportComponent implements OnInit {
   httpService: HttpService;
   embedUrl: string = null;
   errorsXY = {};
+  numberOfColumns: number;
   selectedColumn: number;
   selectedRow: number;
   _selectedTitle: string;
@@ -112,6 +113,7 @@ export class ImportComponent implements OnInit {
     const dataObservable = this.getData();
     dataObservable.subscribe((data) => {
       this.data = data;
+      this.numberOfColumns = data[0].length;
 
       this.hotInstance.loadData(data);
       console.log('Data loaded');
@@ -229,7 +231,10 @@ export class ImportComponent implements OnInit {
         console.log("right arrow");
         nextCol = selectedCol + 1;
       }
-
+      setTimeout(() => {
+        let currentCell = this.elRef.nativeElement.querySelector('hot-table');
+        currentCell.scrollIntoView();
+      }, 10);
       this.tableJumpTo(nextCol, nextRow);
     };
     let afterSelection = (r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) => {
@@ -245,8 +250,6 @@ export class ImportComponent implements OnInit {
         this.selectedColumn = c;
         this.selectedRow = r;
       }
-      let colHeader = this.hotInstance.getColHeader(this.selectedColumn);
-      this.selectedColumnName = colHeader[0];
       this.updateErrorPopup();
     };
     this.tableSettings = {
@@ -257,8 +260,10 @@ export class ImportComponent implements OnInit {
       colHeaders: true,
       fixedRowsTop: 2,
       width: "100%",
-      selectionModeString: 'range',
+      selectionModeString: 'single',
       height: 600,
+      // disableVisualSelection: ['area'],
+      dragToScroll: false,
       afterSelection: afterSelection,
       beforeKeyDown: beforeKeyDown,
       cells: function(row, col, prop) {
@@ -359,6 +364,9 @@ export class ImportComponent implements OnInit {
   private updateErrorPopup() {
     this.updateErrorList();
     if (this.selectedColumn !== null) {
+      let colHeader = this.hotInstance.getColHeader(this.selectedColumn);
+      this.selectedColumnName = colHeader[0];
+
       let errorsX = this.errorsXY[this.selectedColumn];
       this._selectedTitle = this.data[0][this.selectedColumn];
       if (errorsX !== undefined) {
@@ -369,6 +377,7 @@ export class ImportComponent implements OnInit {
       }
     } else {
       this._selectedTitle = null;
+      this.selectedColumnName = null;
     }
   }
 
@@ -432,5 +441,18 @@ export class ImportComponent implements OnInit {
       this.selectedRow = null;
     }
     this.updateErrorList();
+    this.updateErrorPopup();
+  }
+
+  reviewErrors() {
+    this.selectedColumn = 0;
+    this.updateErrorList();
+    this.updateErrorPopup();
+  }
+
+  incrementColumn(val: number) {
+    this.selectedColumn += val;
+    this.updateErrorList();
+    this.updateErrorPopup();
   }
 }
