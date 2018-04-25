@@ -70,7 +70,7 @@ export class ImportComponent implements OnInit {
   private bordersInitialised = false;
   private _hotInstance: Handsontable;
   selectedColumnName: string;
-  showFilters = false;
+  showFilters = true;
 
   @ViewChild('hotTable')
   private hotTableEl: ElementRef;

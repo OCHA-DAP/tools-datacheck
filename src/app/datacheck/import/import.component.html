@@ -82,23 +82,34 @@
             <div [ngClass]="showFilters ? 'col-xs-4' : 'hide'">
               <div class="filters">
                 <div class="filters-title">
-                  <a>Select all</a><a>Clear all</a>
+                  Validation rules
+                  <div class="pull-right">
+                    <a>Select all</a><a>Clear all</a>
+                  </div>
                 </div>
                 <div class="filters-content">
                   <ul>
                     <li>
-                      <label><input type="checkbox"> Check P-Codes</label>
+                      <label><input type="checkbox" checked> Check P-Codes</label>
                     </li>
                     <li>
-                      <label><input type="checkbox"> Check admin unit names</label>
+                      <label><input type="checkbox" checked> Check admin unit names</label>
                     </li>
                     <li>
-                      <label><input type="checkbox"> Check data types (numbers, strings)</label>
+                      <label><input type="checkbox" checked> Check data types (numbers, strings)</label>
+                    </li>
+                    <li>
+                      <label><input type="checkbox" checked> Check leading/trailing/extra </label>
                     </li>
                     <li>
                       <label><input type="checkbox"> Compare to custom list</label>
                     </li>
                   </ul>
+                </div>
+                <div class="coming-soon">
+                  <div class="coming-soon-text">
+                    Coming Soon
+                  </div>
                 </div>
               </div>
             </div>
