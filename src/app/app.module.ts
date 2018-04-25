@@ -1,3 +1,4 @@
+import { ConfigService } from './datacheck/config.service';
 import { HxlproxyService } from './datacheck/services/hxlproxy.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -43,7 +44,8 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions) {
   ],
   providers: [
     HTTP_SERVICE_PROVIDERS,
-    HxlproxyService
+    HxlproxyService,
+    ConfigService
   ],
   bootstrap: [AppComponent]
 })

@@ -1,5 +1,6 @@
+import { ConfigService } from './../config.service';
 import { HxlproxyService } from './../services/hxlproxy.service';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
 import { GooglepickerDirective } from '../../common/googlepicker.directive';
 import { DropboxchooserDirective } from '../../common/dropboxchooser.directive';
 import {
@@ -65,7 +66,9 @@ export class ImportComponent implements OnInit {
               private analyticsService: AnalyticsService,
               http: Http, private sanitizer: DomSanitizer,
               private hotRegisterer: HotTableRegisterer,
-              private hxlProxyService: HxlproxyService) {
+              private hxlProxyService: HxlproxyService,
+              private configService: ConfigService) {
+
     this.httpService = <HttpService> http;
   }
 
@@ -126,6 +129,7 @@ export class ImportComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this._selectedUrl = this.sampleData[0].url;
     this.route.paramMap.subscribe((params: ParamMap) => {
       this.httpService.turnOnModal();
@@ -134,8 +138,12 @@ export class ImportComponent implements OnInit {
         this._selectedUrl = urlParam;
         this.sampleUrlSelected = false;
       }
+      const recipeUrlParam = params.get('recipeUrl');
+      if (recipeUrlParam) {
+        this._selectedRecipeUrl = recipeUrlParam;
+      }
+      this.reloadDataAndValidate();
     });
-    this.reloadDataAndValidate();
 
     let headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
