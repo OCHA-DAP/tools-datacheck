@@ -128,7 +128,7 @@
                   </div>
                   <div class="col-xs-6 section">
                     <div>
-                      <a *ngFor="let location of error.locations" class="cell-href" (click)="jumpTo(location.hashtag, location.row)">{{ getColFromHashtag(location.hashtag) + (location.row + 1)}}</a>
+                      <a *ngFor="let location of error.locations" class="cell-href" (click)="jumpTo(location.col, location.row)">{{ getColHeaderFromCol(location.col) + (location.row + 1)}}</a>
                     </div>
                   </div>
                 </div>

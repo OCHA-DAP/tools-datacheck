@@ -18,7 +18,7 @@ export class HxlproxyService {
         issue.locations.forEach(element => {
           element.type = issue.description;
           element.row += 2;
-          element.hashtag = issue.tag_pattern;
+          // element.hashtag = issue.tag_pattern;
         });
         locations = locations.concat(issue.locations);
       }

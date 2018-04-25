@@ -64,8 +64,7 @@ export class ImportComponent implements OnInit {
   selectedRow: number;
   _selectedTitle: string;
   errorReport: any;
-  colToHash = {};
-  hashToCol = {};
+
   private bordersInitialised = false;
   private _hotInstance: Handsontable;
   selectedColumnName: string;
@@ -107,18 +106,10 @@ export class ImportComponent implements OnInit {
 
   protected reloadDataAndValidate() {
     this.errorsXY = {};
-    this.colToHash = {};
-    this.hashToCol = {};
 
     const dataObservable = this.getData();
     dataObservable.subscribe((data) => {
       this.data = data;
-
-      for (let i = 0; i < data[1].length; i++) {
-        this.colToHash[i] = data[1][i];
-        this.hashToCol[data[1][i]] = i;
-      }
-      console.log('colToHash map is built');
 
       this.hotInstance.loadData(data);
       console.log('Data loaded');
@@ -128,10 +119,10 @@ export class ImportComponent implements OnInit {
     locationsObservable.subscribe((report) => {
       this.errorReport = report;
       report.flatErrors.forEach((val, index) => {
-        let errorsX = this.errorsXY[val.hashtag];
+        let errorsX = this.errorsXY[val.col];
         if (errorsX === undefined) {
           errorsX = {};
-          this.errorsXY[val.hashtag] = errorsX;
+          this.errorsXY[val.col] = errorsX;
         }
         errorsX[val.row] = val.row;
       });
@@ -170,14 +161,14 @@ export class ImportComponent implements OnInit {
     };
     let valueRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
-      const hash = this.colToHash[col];
+      // const hash = this.colToHash[col];
       // if (hash) {
       //   console.log('rendering WITH HASH');
       // } else {
       //   console.log('rendering NO HASH')
       // }
       // if row contains negative number
-      if (this.errorsXY[hash] !== undefined && this.errorsXY[hash][row] !== undefined) {
+      if (this.errorsXY[col] !== undefined && this.errorsXY[col][row] !== undefined) {
         // add class "negative"
         td.style.backgroundColor = '#f9ccc9';
       }
@@ -198,8 +189,7 @@ export class ImportComponent implements OnInit {
       const selectedRow:number = selection[0][0];
       let nextCol: number, nextRow: number;
 
-      const t = this.colToHash[selectedCol];
-      let errorsX = this.errorsXY[t];
+      let errorsX = this.errorsXY[selectedCol];
       if (event.keyCode == 38) {
         // up arrow
         console.log("up arrow");
@@ -227,13 +217,11 @@ export class ImportComponent implements OnInit {
         if (nextRow !== undefined) {
           nextCol = selectedCol;
         }
-      }
-      else if (event.keyCode == 37) {
+      } else if (event.keyCode == 37) {
         // left arrow
         console.log("left arrow");
         nextCol = selectedCol - 1;
-      }
-      else if (event.keyCode == 39) {
+      } else if (event.keyCode == 39) {
         // right arrow
         console.log("right arrow");
         nextCol = selectedCol + 1;
@@ -366,7 +354,7 @@ export class ImportComponent implements OnInit {
   }
 
   private updateErrorPopup() {
-    if (this.selectedColumn !== null){
+    if (this.selectedColumn !== null) {
       let errorsX = this.errorsXY[this.selectedColumn];
       this._selectedTitle = this.data[0][this.selectedColumn];
       if (errorsX !== undefined) {
@@ -395,8 +383,8 @@ export class ImportComponent implements OnInit {
           let locations = issue.locations.slice(0);
           locations = locations.filter((location) => {
             // return (location.col == this.selectedColumn) &&
-            return (location.hashtag == this.colToHash[this.selectedColumn]) &&
-              (this.selectedRow == null || location.row == this.selectedRow);
+            return (location.col === this.selectedColumn) &&
+              (this.selectedRow == null || location.row === this.selectedRow);
           });
           issue.locations = locations;
           issue.location_count = locations.length;
@@ -408,8 +396,8 @@ export class ImportComponent implements OnInit {
     return [];
   }
 
-  getColFromHashtag(hashtag: string) {
-    return this.hotInstance.getColHeader(this.hashToCol[hashtag]);
+  getColHeaderFromCol(col: number) {
+    return this.hotInstance.getColHeader(col);
   }
 
   get selectedTitle(): string {
@@ -419,8 +407,8 @@ export class ImportComponent implements OnInit {
     return text;
   }
 
-  jumpTo(hashtag: string, row: number) {
-    this.selectedColumn = this.hashToCol[hashtag];
+  jumpTo(col: number, row: number) {
+    this.selectedColumn = col;
     this.selectedRow = row;
     this.tableJumpTo(this.selectedColumn, this.selectedRow);
   }
