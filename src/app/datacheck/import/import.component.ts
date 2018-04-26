@@ -92,7 +92,7 @@ export class ImportComponent implements OnInit {
 
     this.httpService = <HttpService> http;
 
-    const BASE_URL = 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/master/pcodes';
+    const BASE_URL = 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/pcodes';
     this.countries = COUNTRIES.map( c => {
       return {
         name: c.name,
