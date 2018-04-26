@@ -1,3 +1,4 @@
+import { COUNTRIES } from './../helpers/constants';
 import { ConfigService } from './../config.service';
 import { HxlproxyService } from './../services/hxlproxy.service';
 import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
@@ -34,7 +35,7 @@ export class ImportComponent implements OnInit {
   _selectedRecipeUrl = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
 
   tableSettings: any;
-  tableId: string = 'table1';
+  tableId = 'table1';
   data: any[] = Handsontable.helper.createSpreadsheetData(10, 10);
   errorList: any[];
 
@@ -72,6 +73,9 @@ export class ImportComponent implements OnInit {
   selectedColumnName: string;
   showFilters = true;
 
+  countries = [];
+  showRecipeDropdown = true;
+
   @ViewChild('hotTable')
   private hotTableEl: ElementRef;
 
@@ -85,6 +89,18 @@ export class ImportComponent implements OnInit {
               private elRef:ElementRef) {
 
     this.httpService = <HttpService> http;
+
+    const BASE_URL = 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/master/pcodes';
+    this.countries = COUNTRIES.map( c => {
+      return {
+        name: c.name,
+        url: `${BASE_URL}/validation-schema-pcodes-${c.iso3}.json`
+      };
+    });
+    this.countries.push({
+      name: 'No country',
+      url: `${BASE_URL}/basic-validation-schema.json`
+    });
   }
 
   get selectedUrl() {
@@ -152,6 +168,11 @@ export class ImportComponent implements OnInit {
         this._selectedRecipeUrl = recipeUrlParam;
       }
       this.reloadDataAndValidate();
+
+      const showRecipeDropdown = params.get('recipeDropdown');
+      if (showRecipeDropdown === 'false') {
+        this.showRecipeDropdown = false;
+      }
     });
 
     let headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {

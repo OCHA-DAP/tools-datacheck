@@ -59,9 +59,22 @@
       <label for="source-custom-url-field">Enter URL</label>
       <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field"
         placeholder="eg. http://example.com/population-jan-2011.json">
-      <label style="padding-top: 10px;" for="source-custom-recipe-url-field">Enter Recipe</label>
-      <input [(ngModel)]="selectedRecipeUrl" name="selectedRecipeUrl" class="wizard-input" id="source-custom-recipe-url-field"
-        placeholder="eg. http://example.com/population-jan-2011.json">
+      <div *ngIf="showRecipeDropdown; else recipeInputBox">
+        <label style="padding-top: 10px;" for="source-custom-recipe-url-field">
+          This file contains data from the following country: (only countries with a
+          <a target="_blank" href="https://public.tableau.com/profile/ocha.field.information.services#!/vizhome/COD-Status_1/DetailedEvaluation">COD</a> "live" service are listed)
+        </label>
+        <select class="form-control countries-dropdown" [(ngModel)]="selectedRecipeUrl">
+          <option *ngFor="let country of countries;" [value]="country.url" [selected]="country.url === selectedRecipeUrl">
+            {{country.name}}
+          </option>
+        </select>
+      </div>
+      <ng-template #recipeInputBox>
+        <label style="padding-top: 10px;" for="source-custom-recipe-url-field">Enter Recipe</label>
+        <input [(ngModel)]="selectedRecipeUrl" name="selectedRecipeUrl" class="wizard-input" id="source-custom-recipe-url-field"
+          placeholder="eg. http://example.com/population-jan-2011.json">
+      </ng-template>
     </div>
   </div>
   <div class="paddingDoubleRowHack customize-section">
