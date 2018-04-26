@@ -21,6 +21,9 @@ import * as Handsontable from 'handsontable';
 import { HotTableRegisterer } from '@handsontable/angular';
 import { Observable } from 'rxjs/Observable';
 
+
+const DEFAULT_RECIPE = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
+
 @Component({
   selector: 'app-import',
   templateUrl: './import.component.html',
@@ -32,7 +35,7 @@ export class ImportComponent implements OnInit {
   sampleUrlSelected = true;
   hxlCheckError: any = null;
   _selectedUrl = '';
-  _selectedRecipeUrl = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
+  _selectedRecipeUrl;
 
   tableSettings: any;
   tableId = 'table1';
@@ -40,22 +43,21 @@ export class ImportComponent implements OnInit {
   errorList: any[];
 
   sampleData = [
+    // {
+    //   'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
+    //   'name': 'Alex\'s dataset',
+    //   'description': 'Lorem ipsum ... ',
+    //   'url': 'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx',
+    //   'org': 'IFRC',
+    //   'recipe': null
+    // },
     {
       'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
-      'name': 'Alex\'s dataset',
+      'name': 'Sample data with name, p-code, and data type errors',
       'description': 'Lorem ipsum ... ',
-      'url': 'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx',
-      'org': 'IFRC'
-    },
-    {
-      'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
-      'name': 'Test dataset (provided by Dan)',
-      'description': 'Lorem ipsum ... ' +
-      'vulnerable populations and SADD available. Data collected and put together by the Malagasy Red ' +
-      'Cross Society (MRCS)',
-      'url': 'https://data.humdata.org/dataset/94b6d7f8-9b6d-4bca-81d7-6abb83edae16/resource/c7fb99a5-43ec-4b3f-b8db-' +
-      '935640c75aeb/download/assesment_data_crm_05april2017.xlsx',
-      'org': 'IFRC',
+      'url': 'https://docs.google.com/spreadsheets/d/1NXG_M2yTrdk5LS7FgUBVHbo6ZdMt3Wmo6jE0oVws2vA/export?format=csv',
+      'org': 'HDX',
+      'recipe': 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/dev/pcodes/validation-schema-pcodes-sle.json'
     }
   ];
 
@@ -71,7 +73,7 @@ export class ImportComponent implements OnInit {
   private bordersInitialised = false;
   private _hotInstance: Handsontable;
   selectedColumnName: string;
-  showFilters = true;
+    showFilters = true;
 
   countries = [];
   showRecipeDropdown = true;
@@ -154,8 +156,7 @@ export class ImportComponent implements OnInit {
   }
 
   ngOnInit() {
-
-    this._selectedUrl = this.sampleData[0].url;
+    this.changeSampleUrl(this.sampleData[0].url, this.sampleData[0].recipe);
     this.route.paramMap.subscribe((params: ParamMap) => {
       this.httpService.turnOnModal();
       const urlParam = params.get('url');
@@ -204,59 +205,62 @@ export class ImportComponent implements OnInit {
       }
     };
     let beforeKeyDown = (event: KeyboardEvent) => {
-      console.log("Key down");
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      event.preventDefault();
 
-      let selection = this.hotInstance.getSelected();
-      console.log(`Selection: ${selection}`);
-      const selectedCol:number = selection[0][1];
-      const selectedRow:number = selection[0][0];
-      let nextCol: number, nextRow: number;
+      if (event.keyCode == 38 || event.keyCode == 40 ||event.keyCode == 37 || event.keyCode == 39) {
+        console.log("Key down");
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        event.preventDefault();
 
-      let errorsX = this.errorsXY[selectedCol];
-      if (event.keyCode == 38) {
-        // up arrow
-        console.log("up arrow");
-        for (let key in errorsX) {
-          const val: number = parseInt(key);
-          if ((val < selectedRow) && (nextRow === undefined || nextRow < val)) {
-            nextRow = val;
+        let selection = this.hotInstance.getSelected();
+        console.log(`Selection: ${selection}`);
+        const selectedCol:number = selection[0][1];
+        const selectedRow:number = selection[0][0];
+        let nextCol: number, nextRow: number;
+
+        let errorsX = this.errorsXY[selectedCol];
+        if (event.keyCode == 38) {
+          // up arrow
+          console.log("up arrow");
+          for (let key in errorsX) {
+            const val: number = parseInt(key);
+            if ((val < selectedRow) && (nextRow === undefined || nextRow < val)) {
+              nextRow = val;
+            }
+          }
+          if (nextRow !== undefined) {
+            nextCol = selectedCol;
+          } else {
+            nextCol = selectedCol;
           }
         }
-        if (nextRow !== undefined) {
-          nextCol = selectedCol;
-        } else {
-          nextCol = selectedCol;
-        }
-      }
-      else if (event.keyCode == 40) {
-        // down arrow
-        console.log("down arrow");
-        for (let key in errorsX) {
-          const val: number = parseInt(key);
-          if ((val > selectedRow) && (nextRow === undefined || nextRow > val)) {
-            nextRow = val;
+        else if (event.keyCode == 40) {
+          // down arrow
+          console.log("down arrow");
+          for (let key in errorsX) {
+            const val: number = parseInt(key);
+            if ((val > selectedRow) && (nextRow === undefined || nextRow > val)) {
+              nextRow = val;
+            }
           }
+          if (nextRow !== undefined) {
+            nextCol = selectedCol;
+          }
+        } else if (event.keyCode == 37) {
+          // left arrow
+          console.log("left arrow");
+          nextCol = selectedCol - 1;
+        } else if (event.keyCode == 39) {
+          // right arrow
+          console.log("right arrow");
+          nextCol = selectedCol + 1;
         }
-        if (nextRow !== undefined) {
-          nextCol = selectedCol;
-        }
-      } else if (event.keyCode == 37) {
-        // left arrow
-        console.log("left arrow");
-        nextCol = selectedCol - 1;
-      } else if (event.keyCode == 39) {
-        // right arrow
-        console.log("right arrow");
-        nextCol = selectedCol + 1;
+        setTimeout(() => {
+          let currentCell = this.elRef.nativeElement.querySelector('hot-table');
+          currentCell.scrollIntoView();
+        }, 10);
+        this.tableJumpTo(nextCol, nextRow);
       }
-      setTimeout(() => {
-        let currentCell = this.elRef.nativeElement.querySelector('hot-table');
-        currentCell.scrollIntoView();
-      }, 10);
-      this.tableJumpTo(nextCol, nextRow);
     };
     let afterSelection = (r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) => {
       this.initBorders();
@@ -280,9 +284,10 @@ export class ImportComponent implements OnInit {
       copyPaste: false,
       colHeaders: true,
       fixedRowsTop: 2,
+      minCols: 26,
       width: "100%",
       selectionModeString: 'single',
-      height: 600,
+      height: "100%",
       // disableVisualSelection: ['area'],
       dragToScroll: false,
       afterSelection: afterSelection,
@@ -358,8 +363,13 @@ export class ImportComponent implements OnInit {
     this.sampleUrlSelected = $event.target.value === 'sample';
   }
 
-  changeSampleUrl(url) {
+  changeSampleUrl(url: string, recipe: string) {
     this.selectedUrl = url;
+    if (recipe == null) {
+      recipe = DEFAULT_RECIPE;
+    }
+    this._selectedRecipeUrl = recipe;
+    this.reloadDataAndValidate();
   }
 
   initBorders() {

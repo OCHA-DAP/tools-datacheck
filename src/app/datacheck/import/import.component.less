@@ -2,6 +2,9 @@
 
 @sampleItemPadding: 10px;
 @sampleItemRadioSize: 20px;
+@topReportHeight: 40vh;
+@lineHeight: 20px;
+
 .sample-item {
   position: relative;
   max-width: 800px;
@@ -102,14 +105,19 @@
 .error-report {
   @errorReportPadding: 30px;
   @navigationMargin: 15px;
-  padding: @errorReportPadding @errorReportPadding @navigationMargin;
+  line-height: @lineHeight;
+  padding: @navigationMargin @errorReportPadding;
   background-color: @darkGrayColor;
   border-radius: 5px;
-  margin-bottom: 30px;
   color: @whiteColor;
-  hr {
-    margin: @navigationMargin -@errorReportPadding;
-    border-top-color: @grayColor;
+  height: @topReportHeight;
+  position: relative;
+
+  .error-top-section {
+    position: absolute;
+    top: @navigationMargin; left: @errorReportPadding;
+    width: 100%;
+    z-index:101;
   }
   .error-breadcrumb {
     ul {
@@ -138,9 +146,26 @@
     }
   }
 
+  @errorTitleTopMargin: 5px;
+  @errorTitleBottomMargin: 10px;
   .error-title {
     .sourceSansProFont(700, 18px);
-    margin: 5px 0 20px;
+    margin: @errorTitleTopMargin 0 @errorTitleBottomMargin;
+  }
+  .error-list-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: @topReportHeight;
+    padding-top: @navigationMargin + 2*@lineHeight + @errorTitleTopMargin + @errorTitleBottomMargin;
+    padding-left: @errorReportPadding;
+    padding-right: @errorReportPadding;
+    padding-bottom: @navigationMargin + @lineHeight + 2*@navigationMargin + 1px;
+    .error-list {
+      overflow-y: auto;
+      height: 100%;
+      width: 100%;
+    }
   }
   .sectionMargin {
     margin: 10px 0;
@@ -183,6 +208,16 @@
   .navigation {
     .sourceSansProFont(700, 14px);
     .letter-spacing-3();
+    position: absolute;
+    bottom: 0; left: 0;
+    padding-left: @errorReportPadding;
+    padding-right: @errorReportPadding;
+    padding-bottom: @navigationMargin;
+    width: 100%;
+    hr {
+      margin: @navigationMargin -@errorReportPadding;
+      border-top-color: @grayColor;
+    }
 
     a {
       color: @whiteColor;
@@ -205,6 +240,10 @@
 
 
 /deep/ .handsontable {
+  width: 100%;
+  height: 50vh;
+  overflow: hidden;
+
   tbody th.ht__highlight, thead th.ht__highlight {
     background-color: @lightGrayColor;
   }
@@ -217,11 +256,16 @@
   }
 }
 
+.hot-container {
+  margin-top: 20px;
+}
+
 .filters {
   @filtersPadding: 15px;
-  border-radius: 5px 5px 0 0;
+  //border-radius: 5px 5px 0 0;
   overflow: hidden;
   position: relative;
+  height: 185px;
 
   .coming-soon {
     position: absolute;
@@ -255,6 +299,7 @@
   .filters-content {
     background-color: @whiteColor;
     padding: @filtersPadding;
+
     ul {
       padding: 0; margin: 0;
       list-style: none;
