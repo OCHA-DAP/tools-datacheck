@@ -364,7 +364,7 @@ export class ImportComponent implements OnInit {
   }
 
   changeSampleUrl(url: string, recipe: string) {
-    this.selectedUrl = url;
+    this._selectedUrl = url;
     if (recipe == null) {
       recipe = DEFAULT_RECIPE;
     }
