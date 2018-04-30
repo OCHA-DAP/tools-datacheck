@@ -1,3 +1,4 @@
+import { RecipeService, RuleType } from './../services/recipe.service';
 import { COUNTRIES } from './../helpers/constants';
 import { ConfigService } from './../config.service';
 import { HxlproxyService } from './../services/hxlproxy.service';
@@ -35,7 +36,10 @@ export class ImportComponent implements OnInit {
   sampleUrlSelected = true;
   hxlCheckError: any = null;
   _selectedUrl = '';
-  _selectedRecipeUrl;
+  _selectedRecipeUrl: string;
+
+  recipeTemplate: any[] = [];
+  ruleTypes: Set<RuleType>;
 
   tableSettings: any;
   tableId = 'table1';
@@ -88,6 +92,7 @@ export class ImportComponent implements OnInit {
               private hotRegisterer: HotTableRegisterer,
               private hxlProxyService: HxlproxyService,
               private configService: ConfigService,
+              private recipeService: RecipeService,
               private elRef: ElementRef) {
 
     this.httpService = <HttpService> http;
@@ -137,8 +142,8 @@ export class ImportComponent implements OnInit {
       console.log('Data loaded');
     });
 
-    const locationsObservable = this.validateData();
-    locationsObservable.subscribe((report) => {
+    const validationObservable = this.validateData();
+    validationObservable.subscribe((report) => {
       this.errorReport = report;
       report.flatErrors.forEach((val, index) => {
         let errorsX = this.errorsXY[val.col];
@@ -152,6 +157,11 @@ export class ImportComponent implements OnInit {
       this.hotInstance.render();
       this.hotInstance.loadData(this.data);
       this.updateErrorList();
+    });
+
+    this.recipeService.fetchRecipeTemplate(this.selectedRecipeUrl).subscribe( recipe => {
+      this.recipeTemplate = recipe;
+      this.ruleTypes = this.recipeService.extractListOfTypes(recipe);
     });
   }
 
@@ -319,6 +329,10 @@ export class ImportComponent implements OnInit {
       }
     }
 
+  }
+
+  protected onRuleTypeChange() {
+    console.log(this.ruleTypes);
   }
 
   private validateData(): Observable<any> {

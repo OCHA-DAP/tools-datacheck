@@ -1,3 +1,4 @@
+import { RecipeService } from './datacheck/services/recipe.service';
 import { ConfigService } from './datacheck/config.service';
 import { HxlproxyService } from './datacheck/services/hxlproxy.service';
 import { BrowserModule } from '@angular/platform-browser';
@@ -45,7 +46,8 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions) {
   providers: [
     HTTP_SERVICE_PROVIDERS,
     HxlproxyService,
-    ConfigService
+    ConfigService,
+    RecipeService
   ],
   bootstrap: [AppComponent]
 })

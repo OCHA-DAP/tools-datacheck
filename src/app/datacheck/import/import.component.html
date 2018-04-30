@@ -116,6 +116,12 @@
                     <li class="col-xs-6">
                       <label><input type="checkbox"> Check against your own list of allowed values</label>
                     </li>
+                    <!--  THIS WILL BE USED ONCE WE LOAD THE RULES FROM THE RECIPE
+                      <li class="col-xs-6" *ngFor="let ruleType of ruleTypes;">
+                      <label><input type="checkbox" [(ngModel)]="ruleType.enabled" (change)="onRuleTypeChange()">{{ ruleType.name }}</label>
+                      </li>
+                    -->
+
                   </ul>
                 </div>
                 <div class="coming-soon">
