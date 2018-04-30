@@ -88,7 +88,7 @@ export class ImportComponent implements OnInit {
               private hotRegisterer: HotTableRegisterer,
               private hxlProxyService: HxlproxyService,
               private configService: ConfigService,
-              private elRef:ElementRef) {
+              private elRef: ElementRef) {
 
     this.httpService = <HttpService> http;
 
@@ -176,7 +176,7 @@ export class ImportComponent implements OnInit {
       }
     });
 
-    let headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {
+    const headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
       if (row === 0) {
         // td.style.fontWeight = 'bold';
@@ -186,7 +186,7 @@ export class ImportComponent implements OnInit {
         td.style.fontWeight = 'bold';
       }
     };
-    let valueRenderer = (instance, td, row, col, prop, value, cellProperties) => {
+    const valueRenderer = (instance, td, row, col, prop, value, cellProperties) => {
       Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
       // const hash = this.colToHash[col];
       // if (hash) {
@@ -204,26 +204,27 @@ export class ImportComponent implements OnInit {
         td.style.fontStyle = 'italic';
       }
     };
-    let beforeKeyDown = (event: KeyboardEvent) => {
+    const beforeKeyDown = (event: KeyboardEvent) => {
 
-      if (event.keyCode == 38 || event.keyCode == 40 ||event.keyCode == 37 || event.keyCode == 39) {
-        console.log("Key down");
+      if (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 37 || event.keyCode === 39) {
+        console.log('Key down');
         event.stopPropagation();
         event.stopImmediatePropagation();
         event.preventDefault();
 
-        let selection = this.hotInstance.getSelected();
+        const selection = this.hotInstance.getSelected();
         console.log(`Selection: ${selection}`);
-        const selectedCol:number = selection[0][1];
-        const selectedRow:number = selection[0][0];
+        const selectedCol: number = selection[0][1];
+        const selectedRow: number = selection[0][0];
         let nextCol: number, nextRow: number;
 
-        let errorsX = this.errorsXY[selectedCol];
-        if (event.keyCode == 38) {
+        const errorsX = this.errorsXY[selectedCol];
+        if (event.keyCode === 38) {
           // up arrow
-          console.log("up arrow");
-          for (let key in errorsX) {
-            const val: number = parseInt(key);
+          console.log('up arrow');
+          // tslint:disable-next-line:forin
+          for (const key in errorsX) {
+            const val: number = parseInt(key, 10);
             if ((val < selectedRow) && (nextRow === undefined || nextRow < val)) {
               nextRow = val;
             }
@@ -233,12 +234,12 @@ export class ImportComponent implements OnInit {
           } else {
             nextCol = selectedCol;
           }
-        }
-        else if (event.keyCode == 40) {
+        } else if (event.keyCode === 40) {
           // down arrow
-          console.log("down arrow");
-          for (let key in errorsX) {
-            const val: number = parseInt(key);
+          console.log('down arrow');
+          // tslint:disable-next-line:forin
+          for (const key in errorsX) {
+            const val: number = parseInt(key, 10);
             if ((val > selectedRow) && (nextRow === undefined || nextRow > val)) {
               nextRow = val;
             }
@@ -246,32 +247,32 @@ export class ImportComponent implements OnInit {
           if (nextRow !== undefined) {
             nextCol = selectedCol;
           }
-        } else if (event.keyCode == 37) {
+        } else if (event.keyCode === 37) {
           // left arrow
-          console.log("left arrow");
+          console.log('left arrow');
           nextCol = selectedCol - 1;
-        } else if (event.keyCode == 39) {
+        } else if (event.keyCode === 39) {
           // right arrow
-          console.log("right arrow");
+          console.log('right arrow');
           nextCol = selectedCol + 1;
         }
         setTimeout(() => {
-          let currentCell = this.elRef.nativeElement.querySelector('hot-table');
+          const currentCell = this.elRef.nativeElement.querySelector('hot-table');
           currentCell.scrollIntoView();
         }, 10);
         this.tableJumpTo(nextCol, nextRow);
       }
     };
-    let afterSelection = (r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) => {
+    const afterSelection = (r: number, c: number, r2: number, c2: number, preventScrolling: object, selectionLayerLevel: number) => {
       this.initBorders();
       console.log(`Selected ${r}, ${c}, ${r2}, ${c2}`);
       this.selectedColumn = null;
       this.selectedRow = null;
-      if ((c2 === c) && ((r2-r) > 1)) {
-        //column selected
+      if ((c2 === c) && ((r2 - r) > 1)) {
+        // column selected
         this.selectedColumn = c;
       } else {
-        //cell selected
+        // cell selected
         this.selectedColumn = c;
         this.selectedRow = r;
       }
@@ -285,15 +286,15 @@ export class ImportComponent implements OnInit {
       colHeaders: true,
       fixedRowsTop: 2,
       minCols: 26,
-      width: "100%",
+      width: '100%',
       selectionModeString: 'single',
-      height: "100%",
+      height: '100%',
       // disableVisualSelection: ['area'],
       dragToScroll: false,
       afterSelection: afterSelection,
       beforeKeyDown: beforeKeyDown,
       cells: function(row, col, prop) {
-        let cellProperties: any = {};
+        const cellProperties: any = {};
 
         if (row < 2) {
           cellProperties.renderer = headerRenderer;
@@ -373,16 +374,16 @@ export class ImportComponent implements OnInit {
   }
 
   initBorders() {
-    let colorBorders = function () {
-      let borders = document.querySelectorAll('.handsontable .wtBorder');
+    const colorBorders = function () {
+      const borders = document.querySelectorAll('.handsontable .wtBorder');
       for (let i = 0; i < borders.length; i++) {
-        let border: HTMLElement = borders[i] as HTMLElement;
+        const border: HTMLElement = borders[i] as HTMLElement;
         border.style.backgroundColor = '#f2645a';
-        if (border.style.width === "1px") {
-          border.style.width = "2px";
+        if (border.style.width === '1px') {
+          border.style.width = '2px';
         }
-        if (border.style.height === "1px") {
-          border.style.height = "0";
+        if (border.style.height === '1px') {
+          border.style.height = '0';
         }
       }
     };
@@ -395,14 +396,14 @@ export class ImportComponent implements OnInit {
   private updateErrorPopup() {
     this.updateErrorList();
     if (this.selectedColumn !== null) {
-      let colHeader = this.hotInstance.getColHeader(this.selectedColumn);
+      const colHeader = this.hotInstance.getColHeader(this.selectedColumn);
       this.selectedColumnName = colHeader[0];
 
-      let errorsX = this.errorsXY[this.selectedColumn];
+      const errorsX = this.errorsXY[this.selectedColumn];
       this._selectedTitle = this.data[0][this.selectedColumn];
       if (errorsX !== undefined) {
         if (this.selectedRow !== null) {
-          let error = errorsX[this.selectedRow];
+          const error = errorsX[this.selectedRow];
           this._selectedTitle = this.data[this.selectedRow][this.selectedColumn];
         }
       }
@@ -420,7 +421,7 @@ export class ImportComponent implements OnInit {
   }
 
   private updateErrorList() {
-    if (this.errorReport){
+    if (this.errorReport) {
       let issues: any[] = JSON.parse(JSON.stringify(this.errorReport.issues));
       if (this.selectedColumn != null) {
         issues = issues.filter((issue) => {
@@ -448,9 +449,10 @@ export class ImportComponent implements OnInit {
   }
 
   get selectedTitle(): string {
-    if (this.selectedColumn != null)
+    if (this.selectedColumn != null) {
       return this._selectedTitle;
-    const text = this.errorReport ? this.errorReport.stats.total + ' problems found': 'Loading report';
+    }
+    const text = this.errorReport ? this.errorReport.stats.total + ' problems found' : 'Loading report';
     return text;
   }
 
@@ -459,12 +461,12 @@ export class ImportComponent implements OnInit {
     this.selectedRow = row;
     this.tableJumpTo(this.selectedColumn, this.selectedRow);
     setTimeout(() => {
-      let currentCell = this.elRef.nativeElement.querySelector('hot-table');
+      const currentCell = this.elRef.nativeElement.querySelector('hot-table');
       currentCell.scrollIntoView();
     }, 10);
   }
 
-  resetSelection(column: boolean, row: boolean){
+  resetSelection(column: boolean, row: boolean) {
     if (column) {
       this.selectedColumn = null;
     }
