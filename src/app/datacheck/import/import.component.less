@@ -260,30 +260,36 @@
   margin-top: 20px;
 }
 
+.error-report-wrapper {
+  .coming-soon .coming-soon-text{
+    top: 30%;
+  }
+}
+
+.coming-soon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 200;
+  background-color: rgba(0, 0, 0, 0.6);
+
+  .coming-soon-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    .gothamBookFont(24px);
+    color: @whiteColor;
+  }
+}
+
 .filters {
   @filtersPadding: 15px;
   //border-radius: 5px 5px 0 0;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   height: 185px;
-
-  .coming-soon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.5);
-
-    .coming-soon-text {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      .gothamBookFont(24px);
-      color: @whiteColor;
-    }
-  }
 
   .filters-title {
     background-color: @extraLightBlueColor;

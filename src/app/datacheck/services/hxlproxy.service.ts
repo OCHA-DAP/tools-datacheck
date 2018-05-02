@@ -35,6 +35,13 @@ export class HxlproxyService {
       return json;
     };
 
+    // Force the proxy to not use cache (useful for the case when the user has fixed his data)
+    params = params ? params : [];
+    params.push({
+      key: 'force',
+      value: 'on'
+    });
+
     const serverUrl = `${environment['hxlProxy']}?`;
     return this.makeCallToHxlProxy<any[]>(serverUrl, params, mapFunction);
   }

@@ -92,29 +92,41 @@
               <div class="filters">
                 <div class="filters-title">
                   Validation rules
-                  <div class="pull-right">
+                  <!-- <div class="pull-right">
                     <a>Select all</a><a>Clear all</a>
-                  </div>
+                  </div> -->
                 </div>
                 <div class="filters-content">
                   <ul class="row">
                     <li class="col-xs-6">
-                      <label><input type="checkbox" checked> Check for valid p-codes</label>
+                      <label
+                      tooltip="For a column with HXL tag indicating it contains p-codes, check the value in each cell is a p-code that can be found in the ITOS service.">
+                      <!-- <input type="checkbox" checked> --> Check for valid p-codes</label>
                     </li>
                     <li class="col-xs-6">
-                      <label><input type="checkbox" checked> Check for valid admin unit names</label>
+                      <label
+                        tooltip="For a column with HXL tag indicating it contains admin unit names, check the value in each cell is an admin unit name that can be found in the ITOS service.">
+                        <!-- <input type="checkbox" checked> --> Check for valid admin unit names</label>
                     </li>
                     <li class="col-xs-6">
-                      <label><input type="checkbox" checked> Check for consistent p-code and name combinations</label>
+                      <label
+                        tooltip="For a column with HXL tag indicating it contains admin unit names and another with HXL tag indicating it contains p-codes, check the values in corresponding cells are consistent by comparing with the ITOS service.">
+                        <!-- <input type="checkbox" checked> --> Check for consistent p-code and name combinations</label>
                     </li>
                     <li class="col-xs-6">
-                      <label><input type="checkbox" checked> Check for consistent data types</label>
+                      <label
+                        tooltip="Check each cell has the same data type as the majority of others a column.">
+                        <!-- <input type="checkbox" checked> --> Check for consistent data types</label>
                     </li>
                     <li class="col-xs-6">
-                      <label><input type="checkbox" checked> Check for white space errors</label>
+                      <label
+                        tooltip="Check each cell for leading and trailing white spaces and for more than one white space between words">
+                        <!-- <input type="checkbox" checked> --> Check for white space errors</label>
                     </li>
                     <li class="col-xs-6">
-                      <label><input type="checkbox"> Check against your own list of allowed values</label>
+                      <label
+                        tooltip="Check each cell in a column against a list of allowed values which you supply. NOT ENABLED YET">
+                        <!-- <input type="checkbox"> --> Check against your own list of allowed values (coming soon)</label>
                     </li>
                     <!--  THIS WILL BE USED ONCE WE LOAD THE RULES FROM THE RECIPE
                       <li class="col-xs-6" *ngFor="let ruleType of ruleTypes;">
@@ -124,77 +136,93 @@
 
                   </ul>
                 </div>
-                <div class="coming-soon">
+                <!-- <div class="coming-soon">
                   <div class="coming-soon-text">
                     Coming Soon
                   </div>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
         </div>
-        <div class="col-xs-12">
-          <div class="title">Error report:</div>
-        </div>
-        <div class="col-xs-12">
-          <div class="error-report">
-            <div class="error-top-section">
-              <div class="error-breadcrumb">
-                <ul>
-                  <li [ngClass]="{'active': selectedColumn == null }" (click)="resetSelection(true, true);">Report summary</li>
-                  <li *ngIf="selectedColumn != null" [ngClass]="{'active': selectedRow == null }" (click)="resetSelection(false, true);" class="active">Column {{ selectedColumnName }}</li>
-                  <li *ngIf="selectedRow != null" class="active">Cell {{ (selectedRow+1) }}</li>
-                </ul>
-              </div>
-              <div class="error-title">
-                {{ selectedTitle }}
-              </div>
+        <div class="error-report-wrapper row">
+          <div class="col-xs-12">
+            <div class="col-xs-12">
+              <div class="title">Error report:</div>
             </div>
-            <div class="error-list-container">
-              <div style="margin: 0 -15px; height: 100%;">
-                <div class="error-list col-xs-12">
-                  <div class="row ">
-                    <div class="col-xs-4 section">
-                      <div class="section-title">Issues</div>
-                    </div>
-                    <div class="col-xs-8 section">
-                      <div class="section-title">Cell</div>
+            <div class="col-xs-12">
+              <div class="error-report">
+                <div class="error-top-section">
+                  <div class="error-breadcrumb">
+                    <ul>
+                      <li [ngClass]="{'active': selectedColumn == null }" (click)="resetSelection(true, true);">Report summary</li>
+                      <li *ngIf="selectedColumn != null" [ngClass]="{'active': selectedRow == null }" (click)="resetSelection(false, true);" class="active">Column {{ selectedColumnName }}</li>
+                      <li *ngIf="selectedRow != null" class="active">Cell {{ (selectedRow+1) }}</li>
+                    </ul>
+                  </div>
+                  <div class="error-title">
+                    {{ selectedTitle }}
+                  </div>
+                </div>
+                <div class="error-list-container">
+                  <div style="margin: 0 -15px; height: 100%;">
+                    <div class="error-list col-xs-12">
+                      <div class="row ">
+                        <div class="col-xs-4 section">
+                          <div class="section-title">Issues</div>
+                        </div>
+                        <div class="col-xs-8 section">
+                          <div class="section-title">Cell</div>
+                        </div>
+                      </div>
+                      <div *ngFor="let error of errorList" class="row section-spacing">
+                        <div class="col-xs-4 section">
+                          <div>{{ error.location_count }} {{ error.description }}</div>
+                        </div>
+                        <div class="col-xs-8 section scrollable">
+                          <div>
+                            <a *ngFor="let location of error.locations" class="cell-href" (click)="jumpTo(location.col, location.row)">{{ getColHeaderFromCol(location.col) + (location.row + 1)}}</a>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div *ngFor="let error of errorList" class="row section-spacing">
-                    <div class="col-xs-4 section">
-                      <div>{{ error.location_count }} {{ error.description }}</div>
+                </div>
+                <div class="navigation">
+                  <hr>
+                  <div class="row">
+                    <div *ngIf="selectedColumn != null">
+                      <div class="col-xs-4 previous">
+                        <a *ngIf="selectedColumn > 0" (click)="incrementColumn(-1)">« Previous column</a>
+                      </div>
+                      <div class="col-xs-4 count"> {{ selectedColumn + 1 }} of {{ numberOfColumns }} </div>
+                      <div class="col-xs-4 next">
+                        <a *ngIf="selectedColumn < numberOfColumns - 1" (click)="incrementColumn(1)">Next column »</a>
+                      </div>
                     </div>
-                    <div class="col-xs-8 section scrollable">
-                      <div>
-                        <a *ngFor="let location of error.locations" class="cell-href" (click)="jumpTo(location.col, location.row)">{{ getColHeaderFromCol(location.col) + (location.row + 1)}}</a>
+                    <div *ngIf="selectedColumn == null">
+                      <div class="col-xs-4 previous"></div>
+                      <div class="col-xs-4 count"> </div>
+                      <div class="col-xs-4 next" (click)="reviewErrors()">
+                        <a>Review errors »</a>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="navigation">
-              <hr>
-              <div class="row">
-                <div *ngIf="selectedColumn != null">
-                  <div class="col-xs-4 previous"><a *ngIf="selectedColumn > 0" (click)="incrementColumn(-1)">« Previous column</a></div>
-                  <div class="col-xs-4 count"> {{ selectedColumn + 1 }} of {{ numberOfColumns }} </div>
-                  <div class="col-xs-4 next"><a *ngIf="selectedColumn < numberOfColumns - 1" (click)="incrementColumn(1)">Next column »</a></div>
-                </div>
-                <div *ngIf="selectedColumn == null">
-                  <div class="col-xs-4 previous"></div>
-                  <div class="col-xs-4 count"> </div>
-                  <div class="col-xs-4 next" (click)="reviewErrors()"><a>Review errors »</a></div>
-                </div>
+            <div class="col-xs-12 hot-container">
+              <hot-table #hotTable [hotId]="tableId" [settings]="tableSettings"></hot-table>
+            </div>
+            <div *ngIf="showLoadingOverlay" class="coming-soon">
+              <div class="coming-soon-text">
+                {{loadingOverlayText}}
               </div>
             </div>
           </div>
         </div>
-        <div class="col-xs-12 hot-container">
-          <hot-table #hotTable [hotId]="tableId" [settings]="tableSettings"></hot-table>
+
         </div>
-      </div>
     </div>
   </div>
 </div>

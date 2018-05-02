@@ -61,7 +61,7 @@ export class ImportComponent implements OnInit {
       'description': 'Lorem ipsum ... ',
       'url': 'https://docs.google.com/spreadsheets/d/1NXG_M2yTrdk5LS7FgUBVHbo6ZdMt3Wmo6jE0oVws2vA/export?format=csv',
       'org': 'HDX',
-      'recipe': 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/dev/pcodes/validation-schema-pcodes-sle.json'
+      'recipe': 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/pcodes/validation-schema-pcodes-sle.json'
     }
   ];
 
@@ -81,6 +81,9 @@ export class ImportComponent implements OnInit {
 
   countries = [];
   showRecipeDropdown = true;
+
+  showLoadingOverlay = false;
+  loadingOverlayText = 'Loading data and running checks ...';
 
   @ViewChild('hotTable')
   private hotTableEl: ElementRef;
@@ -131,6 +134,7 @@ export class ImportComponent implements OnInit {
   }
 
   protected reloadDataAndValidate() {
+    this.showLoadingOverlay = true;
     this.errorsXY = {};
 
     const dataObservable = this.getData();
@@ -157,12 +161,14 @@ export class ImportComponent implements OnInit {
       this.hotInstance.render();
       this.hotInstance.loadData(this.data);
       this.updateErrorList();
+      this.showLoadingOverlay = false;
     });
 
-    this.recipeService.fetchRecipeTemplate(this.selectedRecipeUrl).subscribe( recipe => {
-      this.recipeTemplate = recipe;
-      this.ruleTypes = this.recipeService.extractListOfTypes(recipe);
-    });
+    // THIS WILL BE USED ONCE WE LOAD THE RULES FROM THE RECIPE
+    // this.recipeService.fetchRecipeTemplate(this.selectedRecipeUrl).subscribe( recipe => {
+    //   this.recipeTemplate = recipe;
+    //   this.ruleTypes = this.recipeService.extractListOfTypes(recipe);
+    // });
   }
 
   ngOnInit() {
