@@ -1,4 +1,5 @@
 export const COUNTRIES = [
+  { name: "Bangladesh", iso3: "bgd" },
   { name: "Burkina Faso", iso3: "bfa" },
   { name: "Burundi", iso3: "bdi" },
   { name: "Central African Republic", iso3: "caf" },
