@@ -88,6 +88,7 @@ export class ImportComponent implements OnInit {
   @ViewChild('hotTable')
   private hotTableEl: ElementRef;
 
+  private lastRecipeUrl: string = null;
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
@@ -133,46 +134,8 @@ export class ImportComponent implements OnInit {
     this.reloadDataAndValidate();
   }
 
-  protected reloadDataAndValidate() {
-    this.showLoadingOverlay = true;
-    this.errorsXY = {};
-
-    const dataObservable = this.getData();
-    dataObservable.subscribe((data) => {
-      this.data = data;
-      this.numberOfColumns = data[0].length;
-
-      this.hotInstance.loadData(data);
-      console.log('Data loaded');
-    });
-
-    const validationObservable = this.validateData();
-    validationObservable.subscribe((report) => {
-      this.errorReport = report;
-      report.flatErrors.forEach((val, index) => {
-        let errorsX = this.errorsXY[val.col];
-        if (errorsX === undefined) {
-          errorsX = {};
-          this.errorsXY[val.col] = errorsX;
-        }
-        errorsX[val.row] = val.row;
-      });
-      console.log('showing errors');
-      this.hotInstance.render();
-      this.hotInstance.loadData(this.data);
-      this.updateErrorList();
-      this.showLoadingOverlay = false;
-    });
-
-    // THIS WILL BE USED ONCE WE LOAD THE RULES FROM THE RECIPE
-    // this.recipeService.fetchRecipeTemplate(this.selectedRecipeUrl).subscribe( recipe => {
-    //   this.recipeTemplate = recipe;
-    //   this.ruleTypes = this.recipeService.extractListOfTypes(recipe);
-    // });
-  }
-
   ngOnInit() {
-    this.changeSampleUrl(this.sampleData[0].url, this.sampleData[0].recipe);
+    this.changeSampleUrl(this.sampleData[0].url, this.sampleData[0].recipe, true);
     this.route.paramMap.subscribe((params: ParamMap) => {
       this.httpService.turnOnModal();
       const urlParam = params.get('url');
@@ -337,29 +300,58 @@ export class ImportComponent implements OnInit {
 
   }
 
+  protected reloadDataAndValidate() {
+    this.showLoadingOverlay = true;
+    this.errorsXY = {};
+
+    const dataObservable = this.getData();
+    dataObservable.subscribe((data) => {
+      this.data = data;
+      this.numberOfColumns = data[0].length;
+
+      this.hotInstance.loadData(data);
+      console.log('Data loaded');
+    });
+
+    this.fetchRecipeTemplate(this.selectedRecipeUrl).flatMap(
+      recipe => this.recipeService.validateData(this.selectedUrl, JSON.stringify(recipe))
+    ).subscribe(report => {
+        this.errorReport = report;
+        report.flatErrors.forEach((val, index) => {
+          let errorsX = this.errorsXY[val.col];
+          if (errorsX === undefined) {
+            errorsX = {};
+            this.errorsXY[val.col] = errorsX;
+          }
+          errorsX[val.row] = val.row;
+        });
+        console.log('showing errors');
+        this.hotInstance.render();
+        this.hotInstance.loadData(this.data);
+        this.updateErrorList();
+        this.showLoadingOverlay = false;
+    });
+  }
+
+  private fetchRecipeTemplate(recipeUrl: string): Observable<any[]> {
+    let recipeObs: Observable<any[]> = null;
+    if (this.lastRecipeUrl === recipeUrl && this.recipeTemplate) {
+      recipeObs = Observable.of(this.recipeTemplate);
+    } else {
+      recipeObs = this.recipeService.fetchRecipeTemplate(recipeUrl).map(recipe => {
+        this.recipeTemplate = recipe;
+        this.ruleTypes = this.recipeService.extractListOfTypes(recipe);
+        return recipe;
+      });
+    }
+
+    return recipeObs;
+  }
+
   protected onRuleTypeChange() {
     console.log(this.ruleTypes);
   }
 
-  private validateData(): Observable<any> {
-
-    // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
-    const url = this.selectedUrl;
-    // const schema_url = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
-    const schemaUrl = this.selectedRecipeUrl;
-    const params = [
-      {
-        key: 'url',
-        value: url
-      },
-      {
-        key: 'schema_url',
-        value: schemaUrl
-      }
-    ];
-    const validationResult = this.hxlProxyService.makeValidationCall(params);
-    return validationResult;
-  }
 
   private getData(): Observable<any> {
     // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
@@ -384,13 +376,16 @@ export class ImportComponent implements OnInit {
     this.sampleUrlSelected = $event.target.value === 'sample';
   }
 
-  changeSampleUrl(url: string, recipe: string) {
+  changeSampleUrl(url: string, recipe: string, noReload?: boolean) {
     this._selectedUrl = url;
     if (recipe == null) {
       recipe = DEFAULT_RECIPE;
     }
     this._selectedRecipeUrl = recipe;
-    this.reloadDataAndValidate();
+
+    if (!noReload) {
+      this.reloadDataAndValidate();
+    }
   }
 
   initBorders() {

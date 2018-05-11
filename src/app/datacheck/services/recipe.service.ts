@@ -1,3 +1,4 @@
+import { HxlproxyService } from './hxlproxy.service';
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
@@ -5,7 +6,7 @@ import { Http, Response } from '@angular/http';
 @Injectable()
 export class RecipeService {
 
-  constructor(private http: Http) { }
+  constructor(private http: Http, private hxlProxyService: HxlproxyService) { }
 
   public fetchRecipeTemplate(url): Observable<any[]> {
     return this.http.get(url).map( response => response.json()).catch(err => this.handleError(err));
@@ -19,6 +20,27 @@ export class RecipeService {
       types.add(ruleType);
     }
     return types;
+  }
+
+  public validateData(selectedUrl: string, recipeTemplate: string,
+                  recipeParams?: { [s: string]: string; }): Observable<any> {
+
+    const url = selectedUrl;
+    // const schemaUrl = this.selectedRecipeUrl;
+    const params = [
+      {
+        key: 'url',
+        value: url
+      }
+    ];
+    const postParams = [
+      {
+        key: 'schema_content',
+        value: recipeTemplate
+      }
+    ];
+    const validationResult = this.hxlProxyService.makeValidationCall(params, postParams);
+    return validationResult;
   }
 
   private handleError (error: Response | any, errorHandler?: () => Observable<any>) {
