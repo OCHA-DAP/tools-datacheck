@@ -3,6 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 
+export const RULE_TYPE_TAG = '#valid_severity';
 @Injectable()
 export class RecipeService {
 
@@ -12,12 +13,22 @@ export class RecipeService {
     return this.http.get(url).map( response => response.json()).catch(err => this.handleError(err));
   }
 
-  public extractListOfTypes(recipe: any[]): Set<RuleType> {
-    const types: Set<RuleType> = new Set();
+  public extractListOfTypes(recipe: any[]): Map<string, RuleType> {
+    const types: Map<string, RuleType> = new Map<string, RuleType>();
     for (let i = 0; i < recipe.length; i++) {
       const validationRule = recipe[i];
-      const ruleType = new RuleType(validationRule['#description'], true);
-      types.add(ruleType);
+      const name: string = validationRule[RULE_TYPE_TAG];
+      let description: string = validationRule['#description'];
+      if (name && name.trim()) {
+        description = description && description.trim() ? description : null;
+        let ruleType = types.get(name);
+        if (!ruleType) {
+          ruleType = new RuleType(name, true, description);
+          types.set(name, ruleType);
+        } else if (description) {
+          ruleType.description = description;
+        }
+      }
     }
     return types;
   }
@@ -64,5 +75,5 @@ export class RecipeService {
 }
 
 export class RuleType {
-  constructor(public name: string, public enabled: boolean) {}
+  constructor(public name: string, public enabled: boolean, public description) {}
 }

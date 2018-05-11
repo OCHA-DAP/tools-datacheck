@@ -1,4 +1,4 @@
-import { RecipeService, RuleType } from './../services/recipe.service';
+import { RecipeService, RuleType, RULE_TYPE_TAG } from './../services/recipe.service';
 import { COUNTRIES } from './../helpers/constants';
 import { ConfigService } from './../config.service';
 import { HxlproxyService } from './../services/hxlproxy.service';
@@ -39,7 +39,7 @@ export class ImportComponent implements OnInit {
   _selectedRecipeUrl: string;
 
   recipeTemplate: any[] = [];
-  ruleTypes: Set<RuleType>;
+  ruleTypesMap: Map<string, RuleType>;
 
   tableSettings: any;
   tableId = 'table1';
@@ -114,7 +114,7 @@ export class ImportComponent implements OnInit {
     });
   }
 
-  get selectedUrl() {
+  get selectedUrl(): string {
     return this._selectedUrl;
   }
 
@@ -124,7 +124,7 @@ export class ImportComponent implements OnInit {
     this.reloadDataAndValidate();
   }
 
-  get selectedRecipeUrl() {
+  get selectedRecipeUrl(): string {
     return this._selectedRecipeUrl;
   }
 
@@ -132,6 +132,31 @@ export class ImportComponent implements OnInit {
     this._selectedRecipeUrl = selectedRecipeUrl;
 
     this.reloadDataAndValidate();
+  }
+
+  get ruleTypes(): Set<RuleType> {
+    if (!this.ruleTypesMap) {
+      return new Set<RuleType>();
+    }
+
+    return new Set(this.ruleTypesMap.values());
+  }
+
+  get selectedRules(): any[] {
+    if (this.ruleTypesMap) {
+      const newRules = [];
+      for (let i = 0; i < this.recipeTemplate.length; i++) {
+        const rule = this.recipeTemplate[i];
+        const type = rule[RULE_TYPE_TAG] ? rule[RULE_TYPE_TAG] : '';
+        const ruleType = this.ruleTypesMap.get(type);
+        if (!ruleType || ruleType.enabled) {
+          newRules.push(rule);
+        }
+
+      }
+      return newRules;
+    }
+    throw new Error('Selected rules shouldn\'t be accessed before the rules are loaded');
   }
 
   ngOnInit() {
@@ -313,9 +338,24 @@ export class ImportComponent implements OnInit {
       console.log('Data loaded');
     });
 
-    this.fetchRecipeTemplate(this.selectedRecipeUrl).flatMap(
-      recipe => this.recipeService.validateData(this.selectedUrl, JSON.stringify(recipe))
-    ).subscribe(report => {
+    this.fetchRecipeTemplate(this.selectedRecipeUrl).subscribe(this.validateData.bind(this));
+  }
+
+  private validateData() {
+    this.showLoadingOverlay = true;
+    this.resetErrors();
+    const selectedRules = this.selectedRules;
+    let validationObs = null;
+    if (selectedRules && selectedRules.length > 0) {
+      validationObs = this.recipeService.validateData(this.selectedUrl, JSON.stringify(this.selectedRules));
+    } else {
+      /**
+       * If there's no rule selected we just simulate returning a report with no errors
+       */
+      validationObs = Observable.of(null);
+    }
+    validationObs.subscribe(report => {
+      if (report) {
         this.errorReport = report;
         report.flatErrors.forEach((val, index) => {
           let errorsX = this.errorsXY[val.col];
@@ -325,11 +365,12 @@ export class ImportComponent implements OnInit {
           }
           errorsX[val.row] = val.row;
         });
-        console.log('showing errors');
-        this.hotInstance.render();
-        this.hotInstance.loadData(this.data);
-        this.updateErrorList();
-        this.showLoadingOverlay = false;
+      }
+      console.log('showing errors');
+      this.hotInstance.render();
+      this.hotInstance.loadData(this.data);
+      this.updateErrorList();
+      this.showLoadingOverlay = false;
     });
   }
 
@@ -340,7 +381,7 @@ export class ImportComponent implements OnInit {
     } else {
       recipeObs = this.recipeService.fetchRecipeTemplate(recipeUrl).map(recipe => {
         this.recipeTemplate = recipe;
-        this.ruleTypes = this.recipeService.extractListOfTypes(recipe);
+        this.ruleTypesMap = this.recipeService.extractListOfTypes(recipe);
         return recipe;
       });
     }
@@ -348,8 +389,9 @@ export class ImportComponent implements OnInit {
     return recipeObs;
   }
 
-  protected onRuleTypeChange() {
-    console.log(this.ruleTypes);
+  protected onRuleTypeChange(ruleType: RuleType, $event: any) {
+    console.log(this.ruleTypesMap);
+    this.validateData();
   }
 
 
@@ -467,7 +509,7 @@ export class ImportComponent implements OnInit {
     if (this.selectedColumn != null) {
       return this._selectedTitle;
     }
-    const text = this.errorReport ? this.errorReport.stats.total + ' problems found' : 'Loading report';
+    const text = this.errorReport ? this.errorReport.stats.total + ' problems found' : '';
     return text;
   }
 
@@ -490,6 +532,12 @@ export class ImportComponent implements OnInit {
     }
     this.updateErrorList();
     this.updateErrorPopup();
+  }
+
+  private resetErrors() {
+    this.errorReport = null;
+    this.errorsXY = {};
+    this.errorList = [];
   }
 
   reviewErrors() {
