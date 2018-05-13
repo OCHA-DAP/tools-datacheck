@@ -244,9 +244,16 @@
   height: 50vh;
   overflow: hidden;
 
-  tbody th.ht__highlight, thead th.ht__highlight {
-    background-color: @lightGrayColor;
+  tbody {
+    th.ht__highlight, thead th.ht__highlight {
+      background-color: @lightGrayColor;
+    }
+
+    td {
+      white-space: pre;
+    }
   }
+
 
   td.area:before, td.area-1:before, td.area-2:before, td.area-3:before, td.area-4:before, td.area-5:before, td.area-6:before, td.area-7:before {
     background-color: transparent;
