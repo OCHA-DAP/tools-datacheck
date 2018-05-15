@@ -1,14 +1,16 @@
 import { environment } from './../../../environments/environment';
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { Http, Response, RequestOptions, Headers, URLSearchParams } from '@angular/http';
 
 @Injectable()
 export class HxlproxyService {
 
   constructor(private http: Http) { }
 
-  public makeValidationCall(params: { key: string, value: string }[]): Observable<any> {
+  public makeValidationCall(params: { key: string, value: string }[],
+        postParams: { key: string, value: string }[]): Observable<any> {
+
     const mapFunction = (response: Response) => {
       const json = response.json();
       let locations = [];
@@ -26,7 +28,7 @@ export class HxlproxyService {
       return json;
     };
     const serverUrl = `${environment['hxlProxyValidate']}?`;
-    return this.makeCallToHxlProxy<any[]>(serverUrl, params, mapFunction);
+    return this.makeCallToHxlProxy<any[]>(serverUrl, params, postParams, mapFunction);
   }
 
   public makeDataCall(params: { key: string, value: string }[]): Observable<any[][]> {
@@ -43,7 +45,7 @@ export class HxlproxyService {
     });
 
     const serverUrl = `${environment['hxlProxy']}?`;
-    return this.makeCallToHxlProxy<any[]>(serverUrl, params, mapFunction);
+    return this.makeCallToHxlProxy<any[]>(serverUrl, params, null, mapFunction);
   }
 
   /**
@@ -53,15 +55,9 @@ export class HxlproxyService {
    * @param errorHandler error handling function
    */
   private makeCallToHxlProxy<T>(serverUrl: string, params: { key: string, value: string }[],
+    postParams: { key: string, value: string }[],
     mapFunction: (response: Response) => T,
     errorHandler?: () => Observable<T>): Observable<T> {
-
-    // let myMapFunction: (response: Response) => T;
-    // if (mapFunction) {
-    //   myMapFunction = mapFunction;
-    // } else {
-    //   myMapFunction = (response: Response) => response.json();
-    // }
 
     let url = serverUrl;
     if (params) {
@@ -69,8 +65,18 @@ export class HxlproxyService {
         url += '&' + params[i].key + '=' + encodeURIComponent(params[i].value);
       }
     }
-    console.log('The call will be made to: ' + url);
-    return this.http.get(url).map(mapFunction.bind(this)).catch(err => this.handleError(err, errorHandler));
+    let response: Observable<Response> = null;
+    if (postParams) {
+
+      const postString = postParams.reduce(
+            (acc, p, i) => acc + (i > 0 ? '&' : '')  + p.key + '=' + encodeURIComponent(p.value), '');
+      const headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' });
+      const options = new RequestOptions({ headers: headers });
+      response = this.http.post(url, postString, options);
+    } else {
+      response = this.http.get(url);
+    }
+    return response.map(mapFunction.bind(this)).catch(err => this.handleError(err, errorHandler));
   }
 
   private handleError (error: Response | any, errorHandler?: () => Observable<any>) {

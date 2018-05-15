@@ -92,47 +92,50 @@
               <div class="filters">
                 <div class="filters-title">
                   Validation rules
-                  <!-- <div class="pull-right">
-                    <a>Select all</a><a>Clear all</a>
-                  </div> -->
+                  <div class="pull-right">
+                    <a href="javascript:void(0)" (click)="onSelectDeselectRuleTypes(true)">Select all</a>
+                    <a href="javascript:void(0)" (click)="onSelectDeselectRuleTypes(false)">Clear all</a>
+                  </div>
                 </div>
                 <div class="filters-content">
                   <ul class="row">
-                    <li class="col-xs-6">
+                    <!-- <li class="col-xs-6">
                       <label
                       tooltip="For a column with HXL tag indicating it contains p-codes, check the value in each cell is a p-code that can be found in the ITOS service.">
-                      <!-- <input type="checkbox" checked> --> Check for valid p-codes</label>
+                      Check for valid p-codes</label>
                     </li>
                     <li class="col-xs-6">
                       <label
                         tooltip="For a column with HXL tag indicating it contains admin unit names, check the value in each cell is an admin unit name that can be found in the ITOS service.">
-                        <!-- <input type="checkbox" checked> --> Check for valid admin unit names</label>
+                        Check for valid admin unit names</label>
                     </li>
                     <li class="col-xs-6">
                       <label
                         tooltip="For a column with HXL tag indicating it contains admin unit names and another with HXL tag indicating it contains p-codes, check the values in corresponding cells are consistent by comparing with the ITOS service.">
-                        <!-- <input type="checkbox" checked> --> Check for consistent p-code and name combinations</label>
+                        Check for consistent p-code and name combinations</label>
                     </li>
                     <li class="col-xs-6">
                       <label
                         tooltip="Check each cell has the same data type as the majority of others a column.">
-                        <!-- <input type="checkbox" checked> --> Check for consistent data types</label>
+                        Check for consistent data types</label>
                     </li>
                     <li class="col-xs-6">
                       <label
                         tooltip="Check each cell for leading and trailing white spaces and for more than one white space between words">
-                        <!-- <input type="checkbox" checked> --> Check for white space errors</label>
+                        Check for white space errors</label>
                     </li>
                     <li class="col-xs-6">
                       <label
                         tooltip="Check each cell in a column against a list of allowed values which you supply. NOT ENABLED YET">
-                        <!-- <input type="checkbox"> --> Check against your own list of allowed values (coming soon)</label>
-                    </li>
-                    <!--  THIS WILL BE USED ONCE WE LOAD THE RULES FROM THE RECIPE
+                        Check against your own list of allowed values (coming soon)</label>
+                    </li> -->
+                     <!-- THIS WILL BE USED ONCE WE LOAD THE RULES FROM THE RECIPE -->
                       <li class="col-xs-6" *ngFor="let ruleType of ruleTypes;">
-                      <label><input type="checkbox" [(ngModel)]="ruleType.enabled" (change)="onRuleTypeChange()">{{ ruleType.name }}</label>
+                      <label tooltip="{{ruleType.description}}">
+                        <input type="checkbox" [(ngModel)]="ruleType.enabled" (change)="onRuleTypeChange(ruleType)"> {{ ruleType.name }}
+                      </label>
                       </li>
-                    -->
+
 
                   </ul>
                 </div>
