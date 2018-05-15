@@ -3,7 +3,8 @@ import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 
-export const RULE_TYPE_TAG = '#valid_severity';
+export const RULE_TYPE_TAG = '#rule_type';
+export const RULE_TYPE_DESCRIPTION_TAG = '#rule_type_description';
 @Injectable()
 export class RecipeService {
 
@@ -18,7 +19,7 @@ export class RecipeService {
     for (let i = 0; i < recipe.length; i++) {
       const validationRule = recipe[i];
       const name: string = validationRule[RULE_TYPE_TAG];
-      let description: string = validationRule['#description'];
+      let description: string = validationRule[RULE_TYPE_DESCRIPTION_TAG];
       if (name && name.trim()) {
         description = description && description.trim() ? description : null;
         let ruleType = types.get(name);

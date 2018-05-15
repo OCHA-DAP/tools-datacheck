@@ -389,11 +389,15 @@ export class ImportComponent implements OnInit {
     return recipeObs;
   }
 
-  protected onRuleTypeChange(ruleType: RuleType, $event: any) {
-    console.log(this.ruleTypesMap);
+  protected onRuleTypeChange(ruleType: RuleType) {
+    // console.log(this.ruleTypesMap);
     this.validateData();
   }
 
+  protected onSelectDeselectRuleTypes(selected: boolean) {
+    this.ruleTypes.forEach(ruleType => ruleType.enabled = selected);
+    this.validateData();
+  }
 
   private getData(): Observable<any> {
     // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';

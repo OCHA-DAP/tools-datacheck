@@ -92,9 +92,10 @@
               <div class="filters">
                 <div class="filters-title">
                   Validation rules
-                  <!-- <div class="pull-right">
-                    <a>Select all</a><a>Clear all</a>
-                  </div> -->
+                  <div class="pull-right">
+                    <a href="javascript:void(0)" (click)="onSelectDeselectRuleTypes(true)">Select all</a>
+                    <a href="javascript:void(0)" (click)="onSelectDeselectRuleTypes(false)">Clear all</a>
+                  </div>
                 </div>
                 <div class="filters-content">
                   <ul class="row">
@@ -131,7 +132,7 @@
                      <!-- THIS WILL BE USED ONCE WE LOAD THE RULES FROM THE RECIPE -->
                       <li class="col-xs-6" *ngFor="let ruleType of ruleTypes;">
                       <label tooltip="{{ruleType.description}}">
-                        <input type="checkbox" [(ngModel)]="ruleType.enabled" (change)="onRuleTypeChange(ruleType, $event)"> {{ ruleType.name }}
+                        <input type="checkbox" [(ngModel)]="ruleType.enabled" (change)="onRuleTypeChange(ruleType)"> {{ ruleType.name }}
                       </label>
                       </li>
 
