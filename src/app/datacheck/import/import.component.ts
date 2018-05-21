@@ -33,7 +33,7 @@ const DEFAULT_RECIPE = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai
 export class ImportComponent implements OnInit {
 
   readonly stepName = 'Import Data';
-  sampleUrlSelected = true;
+  dataSource = 'upload';
   hxlCheckError: any = null;
   _selectedUrl = '';
   _selectedRecipeUrl: string;
@@ -173,7 +173,7 @@ export class ImportComponent implements OnInit {
       const urlParam = params.get('url');
       if (urlParam) {
         this._selectedUrl = urlParam;
-        this.sampleUrlSelected = false;
+        this.dataSource = 'sample';
       }
       const recipeUrlParam = params.get('recipeUrl');
       if (recipeUrlParam) {
@@ -346,16 +346,18 @@ export class ImportComponent implements OnInit {
       this.hotInstance.loadData(data);
       console.log('Data loaded');
     }, (error) => {
-      if (error.source_status_code == 404) {
-        this.hxlCheckError = "The provided data source couldn't be found or read, please verify it is correct.";
-      } else if (error.status == 403) {
+      if (error.source_status_code === 404) {
+        this.hxlCheckError = 'The provided data source couldn\'t be found or read, please verify it is correct.';
+      } else if (error.status === 403) {
         this.hxlCheckError = error.message;
-      } else if (error.status == 500 && error.error == "UnicodeDecodeError") {
-        this.hxlCheckError = "The provided data source is not a csv, xls or xlsx or couldn't be read. Please verify your data source!";
+      } else if (error.status === 500 && error.error == 'UnicodeDecodeError') {
+        this.hxlCheckError = 'The provided data source is not a csv, xls or xlsx or couldn\'t be read. Please verify your data source!';
       }
 
       if (!this.hxlCheckError) {
-        this.hxlCheckError = "Sorry, an unexpected has error occurred! Please pass this error report to our support team: " + JSON.stringify(error);
+        this.hxlCheckError =
+          'Sorry, an unexpected has error occurred! Please pass this error report to our support team: '
+          + JSON.stringify(error);
       }
     });
 
@@ -459,10 +461,10 @@ export class ImportComponent implements OnInit {
   updateSelectedUrl(newUrl: string) {
     console.log('Updating with ' + newUrl);
     this.selectedUrl = newUrl;
-    this.sampleUrlSelected = false;
+    this.dataSource = 'url';
   }
   changeDatasource($event) {
-    this.sampleUrlSelected = $event.target.value === 'sample';
+    this.dataSource = $event.target.value;
   }
 
   changeSampleUrl(url: string, recipe: string, noReload?: boolean) {
@@ -622,5 +624,9 @@ export class ImportComponent implements OnInit {
   onCustomValidationTagChange(item, event) {
     item.tag = event.target.value;
     this.rulesRecheck();
+  }
+
+  onFileUpload(file: any) {
+    console.log(file);
   }
 }
