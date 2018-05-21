@@ -1,0 +1,51 @@
+/*
+ * Drag & Drop File Upload component
+ */
+@import "../base/variables";
+@import "../base/mixins";
+
+@dragDropUploadHeight: 300px;
+
+.drag-drop-upload {
+    position: relative;
+    min-height: @dragDropUploadHeight;
+    background-color: @whiteColor;
+    border: 2px dashed @lightGrayColor;
+    border-radius: 6px;
+
+    &.highlight {
+        background-color: @extraLightBlueColor;
+
+        .drag-drop-title {
+            .normal-message {
+                display: none;
+            }
+            .drop-message {
+                display: inline;
+            }
+        }
+
+        .drag-drop-subtitle {
+            display: none;
+        }
+    }
+
+    .drag-drop-center-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .drag-drop-title{
+        .gothamBoldFont(14px);
+        text-align: center;
+
+        .drop-message {
+            display: none;
+        }
+    }
+    .drag-drop-subtitle {
+        .gothamBookFont(14px);
+    }
+
+}
