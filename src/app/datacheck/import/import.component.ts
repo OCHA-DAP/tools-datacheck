@@ -77,7 +77,7 @@ export class ImportComponent implements OnInit {
   private bordersInitialised = false;
   private _hotInstance: Handsontable;
   selectedColumnName: string;
-    showFilters = true;
+  showFilters = true;
 
   countries = [];
   showRecipeDropdown = true;
@@ -85,10 +85,17 @@ export class ImportComponent implements OnInit {
   showLoadingOverlay = false;
   loadingOverlayText = 'Loading data and running checks ...';
 
+  customValidation = false;
+  customValidationList: Array<any> = null;
+
   @ViewChild('hotTable')
   private hotTableEl: ElementRef;
 
   private lastRecipeUrl: string = null;
+  public dataTitle: string[];
+  public dataHXLTags: string[];
+  public customValidationChoices: string[];
+
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
@@ -331,6 +338,8 @@ export class ImportComponent implements OnInit {
 
     const dataObservable = this.getData();
     dataObservable.subscribe((data) => {
+      this.dataTitle = data[0].slice(0);
+      this.dataHXLTags = data[1].slice(0);
       this.data = data;
       this.numberOfColumns = data[0].length;
 
@@ -344,10 +353,28 @@ export class ImportComponent implements OnInit {
   private validateData() {
     this.showLoadingOverlay = true;
     this.resetErrors();
-    const selectedRules = this.selectedRules;
+    const selectedRules = this.selectedRules.slice(0);
+    if (this.customValidationList) {
+      this.customValidationList.forEach((val, idx) => {
+        if (val.values && val.tag) {
+          const values = val.values.replace(',','|');
+          const index = idx + 1;
+          selectedRules.push({
+            "#valid_tag": val.tag,
+            "#valid_severity":"error",
+            "#valid_value+list": values,
+            // "#valid_value+target_tag": val.tag,
+            "#description":"Custom list validation " + index,
+            // "#rule_type":"Check for valid values",
+            // "#rule_type_description":"Check for valid values"
+          });
+        }
+      });
+    }
+
     let validationObs = null;
     if (selectedRules && selectedRules.length > 0) {
-      validationObs = this.recipeService.validateData(this.selectedUrl, JSON.stringify(this.selectedRules));
+      validationObs = this.recipeService.validateData(this.selectedUrl, JSON.stringify(selectedRules));
     } else {
       /**
        * If there's no rule selected we just simulate returning a report with no errors
@@ -391,6 +418,10 @@ export class ImportComponent implements OnInit {
 
   protected onRuleTypeChange(ruleType: RuleType) {
     // console.log(this.ruleTypesMap);
+    this.rulesRecheck();
+  }
+
+  protected rulesRecheck() {
     this.validateData();
   }
 
@@ -554,5 +585,30 @@ export class ImportComponent implements OnInit {
     this.selectedColumn += val;
     this.updateErrorList();
     this.updateErrorPopup();
+  }
+
+  onTriggerCustomValidation() {
+    if (this.customValidation) {
+      if (this.customValidationList == null) {
+        this.customValidationList = [];
+        this.onAddNewCustomValidation();
+      }
+    }
+  }
+
+  onAddNewCustomValidation() {
+    this.customValidationList.push({
+      values: null,
+      column: null
+    });
+  }
+
+  onRemoveCustomValidation(idx) {
+    this.customValidationList.splice(idx, 1);
+  }
+
+  onCustomValidationTagChange(item, event) {
+    item.tag = event.target.value;
+    this.rulesRecheck();
   }
 }
