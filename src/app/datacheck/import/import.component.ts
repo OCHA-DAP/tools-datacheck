@@ -335,7 +335,7 @@ export class ImportComponent implements OnInit {
   protected reloadDataAndValidate() {
     this.showLoadingOverlay = true;
     this.errorsXY = {};
-
+    this.hxlCheckError = null;
     const dataObservable = this.getData();
     dataObservable.subscribe((data) => {
       this.dataTitle = data[0].slice(0);
@@ -345,6 +345,18 @@ export class ImportComponent implements OnInit {
 
       this.hotInstance.loadData(data);
       console.log('Data loaded');
+    }, (error) => {
+      if (error.source_status_code == 404) {
+        this.hxlCheckError = "The provided data source couldn't be found or read, please verify it is correct.";
+      } else if (error.status == 403) {
+        this.hxlCheckError = error.message;
+      } else if (error.status == 500 && error.error == "UnicodeDecodeError") {
+        this.hxlCheckError = "The provided data source is not a csv, xls or xlsx or couldn't be read. Please verify your data source!";
+      }
+
+      if (!this.hxlCheckError) {
+        this.hxlCheckError = "Sorry, an unexpected has error occurred! Please pass this error report to our support team: " + JSON.stringify(error);
+      }
     });
 
     this.fetchRecipeTemplate(this.selectedRecipeUrl).subscribe(this.validateData.bind(this));

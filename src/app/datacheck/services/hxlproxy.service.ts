@@ -85,7 +85,7 @@ export class HxlproxyService {
       try {
         const body = error.json() || '';
         const err = body.error || JSON.stringify(body);
-        errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+        errMsg = body; //`${error.status} - ${error.statusText || ''} ${err}`;
       } catch (e) {
         errMsg = e.toString();
       }

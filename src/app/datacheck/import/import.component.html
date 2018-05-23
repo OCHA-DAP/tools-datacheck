@@ -37,7 +37,6 @@
         </div>
       </div>
       <div *ngIf="sampleUrlSelected" class="col-xs-6 source-sample-data">
-        <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
         <div *ngFor="let s of sampleData" >
           <label class="sample-item active">
             <input name="sample-data-selection" value="{{ s.url }}" type="radio" [checked]=" (s.url === selectedUrl) ? true : null" (change)="changeSampleUrl(s.url, s.recipe);">
@@ -56,7 +55,6 @@
         </div>
       </div>
       <div *ngIf="!sampleUrlSelected" class="col-xs-6 source-custom-url">
-        <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
         <label for="source-custom-url-field">Enter URL</label>
         <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field"
                placeholder="eg. http://example.com/population-jan-2011.json">
@@ -76,6 +74,11 @@
           <input [(ngModel)]="selectedRecipeUrl" name="selectedRecipeUrl" class="wizard-input" id="source-custom-recipe-url-field"
                  placeholder="eg. http://example.com/population-jan-2011.json">
         </ng-template>
+      </div>
+    </div>
+    <div class="row" *ngIf="hxlCheckError">
+      <div class="col-xs-offset-3 col-xs-6">
+        <div class="alert alert-danger" role="alert"> {{ hxlCheckError }}</div>
       </div>
     </div>
   </div>
