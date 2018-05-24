@@ -373,7 +373,7 @@ export class ImportComponent implements OnInit {
     if (this.customValidationList) {
       this.customValidationList.forEach((val, idx) => {
         if (val.values && val.tag) {
-          const values = val.values.replace(',', '|');
+          const values = val.values.replace(/,/g, '|');
           const index = idx + 1;
           selectedRules.push({
             '#valid_tag': val.tag,
@@ -402,6 +402,8 @@ export class ImportComponent implements OnInit {
     validationObs.subscribe(report => {
       if (report) {
         this.data = report.dataset;
+        this.dataTitle = this.data[0].slice(0);
+        this.dataHXLTags = this.data[1].slice(0);
         this.numberOfColumns = this.data[0].length;
 
         this.errorReport = report;
