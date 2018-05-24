@@ -38,6 +38,8 @@ export class ImportComponent implements OnInit {
   _selectedUrl = '';
   _selectedRecipeUrl: string;
 
+  selectedFile: File = null;
+
   recipeTemplate: any[] = [];
   ruleTypesMap: Map<string, RuleType>;
 
@@ -329,14 +331,14 @@ export class ImportComponent implements OnInit {
     this.showLoadingOverlay = true;
     this.errorsXY = {};
 
-    const dataObservable = this.getData();
-    dataObservable.subscribe((data) => {
-      this.data = data;
-      this.numberOfColumns = data[0].length;
+    // const dataObservable = this.getData();
+    // dataObservable.subscribe((data) => {
+    //   this.data = data;
+    //   this.numberOfColumns = data[0].length;
 
-      this.hotInstance.loadData(data);
-      console.log('Data loaded');
-    });
+    //   this.hotInstance.loadData(data);
+    //   console.log('Data loaded');
+    // });
 
     this.fetchRecipeTemplate(this.selectedRecipeUrl).subscribe(this.validateData.bind(this));
   }
@@ -346,8 +348,10 @@ export class ImportComponent implements OnInit {
     this.resetErrors();
     const selectedRules = this.selectedRules;
     let validationObs = null;
-    if (selectedRules && selectedRules.length > 0) {
-      validationObs = this.recipeService.validateData(this.selectedUrl, JSON.stringify(this.selectedRules));
+    if (this.dataSource === 'upload' && this.selectedFile) {
+      validationObs = this.recipeService.validateData(null, this.selectedFile, JSON.stringify(this.selectedRules));
+    } else if (selectedRules && selectedRules.length > 0) {
+      validationObs = this.recipeService.validateData(this.selectedUrl, null, JSON.stringify(this.selectedRules));
     } else {
       /**
        * If there's no rule selected we just simulate returning a report with no errors
@@ -356,6 +360,9 @@ export class ImportComponent implements OnInit {
     }
     validationObs.subscribe(report => {
       if (report) {
+        this.data = report.dataset;
+        this.numberOfColumns = this.data[0].length;
+
         this.errorReport = report;
         report.flatErrors.forEach((val, index) => {
           let errorsX = this.errorsXY[val.col];
@@ -399,19 +406,19 @@ export class ImportComponent implements OnInit {
     this.validateData();
   }
 
-  private getData(): Observable<any> {
-    // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
-    const url = this.selectedUrl;
-    const params = [
-      {
-        key: 'url',
-        value: url
-      }
-    ];
+  // private getData(): Observable<any> {
+  //   // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
+  //   const url = this.selectedUrl;
+  //   const params = [
+  //     {
+  //       key: 'url',
+  //       value: url
+  //     }
+  //   ];
 
-    const result = this.hxlProxyService.makeDataCall(params);
-    return result;
-  }
+  //   const result = this.hxlProxyService.makeDataCall(params);
+  //   return result;
+  // }
 
   updateSelectedUrl(newUrl: string) {
     console.log('Updating with ' + newUrl);
@@ -556,7 +563,9 @@ export class ImportComponent implements OnInit {
     this.updateErrorPopup();
   }
 
-  onFileUpload(file: any) {
+  onFileUpload(file: File) {
     console.log(file);
+    this.selectedFile = file;
+    this.reloadDataAndValidate();
   }
 }
