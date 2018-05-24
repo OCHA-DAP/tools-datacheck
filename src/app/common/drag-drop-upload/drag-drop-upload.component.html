@@ -1,0 +1,9 @@
+<div class="drag-drop-upload" [class.highlight]="highlight" (dragover)="onDragOver($event)" (dragenter)="onDragOver($event)"
+     (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+  <input #fileInput style="display: none;" type="file" id="fileElem" (change)="onSelect($event)">
+  <div class="drag-drop-center-container">
+    <div class="drag-drop-title"><span class="normal-message"> Drop file or <a href (click)="onBrowse($event)">Browse</a></span> <span class="drop-message">Incoming file ...</span></div>
+    <div class="drag-drop-subtitle">(.csv, .xls, or .xlsx only)</div>
+    <div *ngIf="filename" class="drag-drop-body">You have selected: <span class="drag-drop-filename">{{filename}}</span></div>
+  </div>
+</div>

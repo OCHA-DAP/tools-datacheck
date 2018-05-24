@@ -33,10 +33,12 @@ const DEFAULT_RECIPE = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai
 export class ImportComponent implements OnInit {
 
   readonly stepName = 'Import Data';
-  sampleUrlSelected = true;
+  dataSource = 'upload';
   hxlCheckError: any = null;
   _selectedUrl = '';
   _selectedRecipeUrl: string;
+
+  selectedFile: File = null;
 
   recipeTemplate: any[] = [];
   ruleTypesMap: Map<string, RuleType>;
@@ -173,7 +175,7 @@ export class ImportComponent implements OnInit {
       const urlParam = params.get('url');
       if (urlParam) {
         this._selectedUrl = urlParam;
-        this.sampleUrlSelected = false;
+        this.dataSource = 'sample';
       }
       const recipeUrlParam = params.get('recipeUrl');
       if (recipeUrlParam) {
@@ -336,28 +338,30 @@ export class ImportComponent implements OnInit {
     this.showLoadingOverlay = true;
     this.errorsXY = {};
     this.hxlCheckError = null;
-    const dataObservable = this.getData();
-    dataObservable.subscribe((data) => {
-      this.dataTitle = data[0].slice(0);
-      this.dataHXLTags = data[1].slice(0);
-      this.data = data;
-      this.numberOfColumns = data[0].length;
+    // const dataObservable = this.getData();
+    // dataObservable.subscribe((data) => {
+    //   this.dataTitle = data[0].slice(0);
+    //   this.dataHXLTags = data[1].slice(0);
+    //   this.data = data;
+    //   this.numberOfColumns = data[0].length;
 
-      this.hotInstance.loadData(data);
-      console.log('Data loaded');
-    }, (error) => {
-      if (error.source_status_code == 404) {
-        this.hxlCheckError = "The provided data source couldn't be found or read, please verify it is correct.";
-      } else if (error.status == 403) {
-        this.hxlCheckError = error.message;
-      } else if (error.status == 500 && error.error == "UnicodeDecodeError") {
-        this.hxlCheckError = "The provided data source is not a csv, xls or xlsx or couldn't be read. Please verify your data source!";
-      }
+    //   this.hotInstance.loadData(data);
+    //   console.log('Data loaded');
+    // }, (error) => {
+    //   if (error.source_status_code === 404) {
+    //     this.hxlCheckError = 'The provided data source couldn\'t be found or read, please verify it is correct.';
+    //   } else if (error.status === 403) {
+    //     this.hxlCheckError = error.message;
+    //   } else if (error.status === 500 && error.error == 'UnicodeDecodeError') {
+    //     this.hxlCheckError = 'The provided data source is not a csv, xls or xlsx or couldn\'t be read. Please verify your data source!';
+    //   }
 
-      if (!this.hxlCheckError) {
-        this.hxlCheckError = "Sorry, an unexpected has error occurred! Please pass this error report to our support team: " + JSON.stringify(error);
-      }
-    });
+    //   if (!this.hxlCheckError) {
+    //     this.hxlCheckError =
+    //       'Sorry, an unexpected has error occurred! Please pass this error report to our support team: '
+    //       + JSON.stringify(error);
+    //   }
+    // });
 
     this.fetchRecipeTemplate(this.selectedRecipeUrl).subscribe(this.validateData.bind(this));
   }
@@ -369,14 +373,14 @@ export class ImportComponent implements OnInit {
     if (this.customValidationList) {
       this.customValidationList.forEach((val, idx) => {
         if (val.values && val.tag) {
-          const values = val.values.replace(',','|');
+          const values = val.values.replace(/,/g, '|');
           const index = idx + 1;
           selectedRules.push({
-            "#valid_tag": val.tag,
-            "#valid_severity":"error",
-            "#valid_value+list": values,
+            '#valid_tag': val.tag,
+            '#valid_severity': 'error',
+            '#valid_value+list': values,
             // "#valid_value+target_tag": val.tag,
-            "#description":"Custom list validation " + index,
+            '#description': 'Custom list validation ' + index,
             // "#rule_type":"Check for valid values",
             // "#rule_type_description":"Check for valid values"
           });
@@ -385,8 +389,10 @@ export class ImportComponent implements OnInit {
     }
 
     let validationObs = null;
-    if (selectedRules && selectedRules.length > 0) {
-      validationObs = this.recipeService.validateData(this.selectedUrl, JSON.stringify(selectedRules));
+    if (this.dataSource === 'upload' && this.selectedFile) {
+      validationObs = this.recipeService.validateData(null, this.selectedFile, JSON.stringify(selectedRules));
+    } else if (selectedRules && selectedRules.length > 0) {
+      validationObs = this.recipeService.validateData(this.selectedUrl, null, JSON.stringify(selectedRules));
     } else {
       /**
        * If there's no rule selected we just simulate returning a report with no errors
@@ -395,6 +401,11 @@ export class ImportComponent implements OnInit {
     }
     validationObs.subscribe(report => {
       if (report) {
+        this.data = report.dataset;
+        this.dataTitle = this.data[0].slice(0);
+        this.dataHXLTags = this.data[1].slice(0);
+        this.numberOfColumns = this.data[0].length;
+
         this.errorReport = report;
         report.flatErrors.forEach((val, index) => {
           let errorsX = this.errorsXY[val.col];
@@ -442,27 +453,27 @@ export class ImportComponent implements OnInit {
     this.validateData();
   }
 
-  private getData(): Observable<any> {
-    // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
-    const url = this.selectedUrl;
-    const params = [
-      {
-        key: 'url',
-        value: url
-      }
-    ];
+  // private getData(): Observable<any> {
+  //   // const url =  'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx';
+  //   const url = this.selectedUrl;
+  //   const params = [
+  //     {
+  //       key: 'url',
+  //       value: url
+  //     }
+  //   ];
 
-    const result = this.hxlProxyService.makeDataCall(params);
-    return result;
-  }
+  //   const result = this.hxlProxyService.makeDataCall(params);
+  //   return result;
+  // }
 
   updateSelectedUrl(newUrl: string) {
     console.log('Updating with ' + newUrl);
     this.selectedUrl = newUrl;
-    this.sampleUrlSelected = false;
+    this.dataSource = 'url';
   }
   changeDatasource($event) {
-    this.sampleUrlSelected = $event.target.value === 'sample';
+    this.dataSource = $event.target.value;
   }
 
   changeSampleUrl(url: string, recipe: string, noReload?: boolean) {
@@ -622,5 +633,11 @@ export class ImportComponent implements OnInit {
   onCustomValidationTagChange(item, event) {
     item.tag = event.target.value;
     this.rulesRecheck();
+  }
+
+  onFileUpload(file: File) {
+    console.log(file);
+    this.selectedFile = file;
+    this.reloadDataAndValidate();
   }
 }

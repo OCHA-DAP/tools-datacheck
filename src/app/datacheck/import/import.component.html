@@ -17,9 +17,10 @@
     <div class="row">
       <div class="col-xs-3">
         <div class="radio-selection">
-          <label for="data-source-sample"><input type="radio" value="sample" name="data-source" (change)="changeDatasource($event);" [checked]="sampleUrlSelected" id="data-source-sample"> Try our sample data</label>
+            <label for="data-source-upload"><input type="radio" value="upload" name="data-source" (change)="changeDatasource($event);" [checked]="dataSource == 'upload'" id="data-source-upload"> Upload a file</label>
+          <label for="data-source-sample"><input type="radio" value="sample" name="data-source" (change)="changeDatasource($event);" [checked]="dataSource == 'sample'" id="data-source-sample"> Try our sample data</label>
           <label for="data-source-url-apis">
-            <input type="radio" value="url" name="data-source" (change)="changeDatasource($event);" [checked]="!sampleUrlSelected" id="data-source-url-apis"> Import from URL/APIs
+            <input type="radio" value="url" name="data-source" (change)="changeDatasource($event);" [checked]="dataSource == 'url'" id="data-source-url-apis"> Import from URL/APIs
             <ul>
               <li>
                 <a href="javascript:void(0)" hdxDropboxchooser (urlSelect)="updateSelectedUrl($event)">
@@ -36,7 +37,12 @@
           </label>
         </div>
       </div>
-      <div *ngIf="sampleUrlSelected" class="col-xs-6 source-sample-data">
+      <div *ngIf="dataSource == 'upload'" class="col-xs-6 source-upload">
+        <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
+        <hdx-drag-drop-upload (selected)="onFileUpload($event)"></hdx-drag-drop-upload>
+        <div class="source-upload-note">Note: If your spreadsheet has multiple tabs, only the data from the first tab will be imported.</div>
+      </div>
+      <div *ngIf="dataSource == 'sample'" class="col-xs-6 source-sample-data">
         <div *ngFor="let s of sampleData" >
           <label class="sample-item active">
             <input name="sample-data-selection" value="{{ s.url }}" type="radio" [checked]=" (s.url === selectedUrl) ? true : null" (change)="changeSampleUrl(s.url, s.recipe);">
@@ -54,7 +60,8 @@
           </label>
         </div>
       </div>
-      <div *ngIf="!sampleUrlSelected" class="col-xs-6 source-custom-url">
+      <div *ngIf="dataSource == 'url'" class="col-xs-6 source-custom-url">
+        <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
         <label for="source-custom-url-field">Enter URL</label>
         <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field"
                placeholder="eg. http://example.com/population-jan-2011.json">
