@@ -369,7 +369,7 @@ export class ImportComponent implements OnInit {
     if (this.customValidationList) {
       this.customValidationList.forEach((val, idx) => {
         if (val.values && val.tag) {
-          const values = val.values.replace(',','|');
+          const values = val.values.replace(/,/g, '|');
           const index = idx + 1;
           selectedRules.push({
             "#valid_tag": val.tag,
@@ -582,6 +582,7 @@ export class ImportComponent implements OnInit {
   }
 
   private resetErrors() {
+    this.hxlCheckError = null;
     this.errorReport = null;
     this.errorsXY = {};
     this.errorList = [];
@@ -601,10 +602,11 @@ export class ImportComponent implements OnInit {
 
   onTriggerCustomValidation() {
     if (this.customValidation) {
-      if (this.customValidationList == null) {
-        this.customValidationList = [];
-        this.onAddNewCustomValidation();
-      }
+      this.customValidationList = [];
+      this.onAddNewCustomValidation();
+    } else {
+      this.customValidationList = [];
+      this.rulesRecheck();
     }
   }
 
