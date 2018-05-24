@@ -293,10 +293,14 @@
 
 .filters {
   @filtersPadding: 15px;
-  //border-radius: 5px 5px 0 0;
-  overflow: visible;
   position: relative;
-  height: 185px;
+  margin-top: 32px;
+
+  &.custom-filter {
+    .filters-content {
+      overflow-y: scroll;
+    }
+  }
 
   .filters-title {
     background-color: @extraLightBlueColor;
@@ -312,6 +316,7 @@
   .filters-content {
     background-color: @whiteColor;
     padding: @filtersPadding;
+    height: 250px;
 
     ul {
       padding: 0; margin: 0;
@@ -332,4 +337,61 @@
 .form-control.countries-dropdown {
   font-size: initial;
   color: @darkGrayColor;
+}
+
+.custom-list {
+  & ~ .custom-list {
+    margin-top: 5px;
+  }
+  .custom-list-title {
+    font-size: 12px;
+  }
+
+  .custom-list-values {
+    position: relative;
+    padding-right: 30px;
+
+    input {
+      width: 100%;
+    }
+    i.glyphicon-plus, i.glyphicon-minus {
+      position: absolute;
+      top: 10px;
+      right: 0;
+      color: @blueColor;
+    }
+    select {
+      margin-top: 5px;
+      width: 100%;
+    }
+  }
+}
+
+@inputInnerTextPadding: 15px;
+@inputLineHeight: 20px;
+/deep/ input[type='text'], textarea, select {
+
+  background-color: @whiteColor;
+  width: 100%;
+  border: 1px solid @lightGrayColor;
+  line-height: @inputLineHeight;
+  padding: @inputInnerTextPadding/2 @inputInnerTextPadding;
+
+  .sourceSansProFont(400, 14px);
+  color: @darkGrayColor;
+
+  //border-radius: 6px;
+
+  &::placeholder {
+    color: @lightGrayColor;
+    font-size: 13px;
+  }
+
+  &:focus {
+    border-color: @blueColor;
+    outline: none;
+  }
+}
+/deep/ select {
+  height: @inputInnerTextPadding + @inputLineHeight;
 }

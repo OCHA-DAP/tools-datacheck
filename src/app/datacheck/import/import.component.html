@@ -13,34 +13,34 @@
       </div>
     </div>
   </div>
-  <div class="row step-content">
-    <div class="col-xs-3">
-      <div class="radio-selection">
-        <label for="data-source-sample"><input type="radio" value="sample" name="data-source" (change)="changeDatasource($event);" [checked]="sampleUrlSelected" id="data-source-sample"> Try our sample data</label>
-        <label for="data-source-url-apis">
-          <input type="radio" value="url" name="data-source" (change)="changeDatasource($event);" [checked]="!sampleUrlSelected" id="data-source-url-apis"> Import from URL/APIs
-          <ul>
-            <li>
-              <a href="javascript:void(0)" hdxDropboxchooser (urlSelect)="updateSelectedUrl($event)">
-                <img src="./assets/icons/dropbox.png"> Dropbox
-              </a>
-            </li>
-            <li>
-              <a href="javascript:void(0)" hdxGooglepicker (urlSelect)="updateSelectedUrl($event)">
-                <img src="./assets/icons/drive.png">Google Drive
-              </a>
-            </li>
-            <li class="disabled"><img src="./assets/icons/hdx.ico">HDX (Coming soon)</li>
-          </ul>
-        </label>
+  <div class="step-content">
+    <div class="row">
+      <div class="col-xs-3">
+        <div class="radio-selection">
+          <label for="data-source-sample"><input type="radio" value="sample" name="data-source" (change)="changeDatasource($event);" [checked]="sampleUrlSelected" id="data-source-sample"> Try our sample data</label>
+          <label for="data-source-url-apis">
+            <input type="radio" value="url" name="data-source" (change)="changeDatasource($event);" [checked]="!sampleUrlSelected" id="data-source-url-apis"> Import from URL/APIs
+            <ul>
+              <li>
+                <a href="javascript:void(0)" hdxDropboxchooser (urlSelect)="updateSelectedUrl($event)">
+                  <img src="./assets/icons/dropbox.png"> Dropbox
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0)" hdxGooglepicker (urlSelect)="updateSelectedUrl($event)">
+                  <img src="./assets/icons/drive.png">Google Drive
+                </a>
+              </li>
+              <li class="disabled"><img src="./assets/icons/hdx.ico">HDX (Coming soon)</li>
+            </ul>
+          </label>
+        </div>
       </div>
-    </div>
-    <div *ngIf="sampleUrlSelected" class="col-xs-9 source-sample-data">
-      <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
-      <div *ngFor="let s of sampleData" >
-        <label class="sample-item active">
-          <input name="sample-data-selection" value="{{ s.url }}" type="radio" [checked]=" (s.url === selectedUrl) ? true : null" (change)="changeSampleUrl(s.url, s.recipe);">
-          <span class="sample-content">
+      <div *ngIf="sampleUrlSelected" class="col-xs-6 source-sample-data">
+        <div *ngFor="let s of sampleData" >
+          <label class="sample-item active">
+            <input name="sample-data-selection" value="{{ s.url }}" type="radio" [checked]=" (s.url === selectedUrl) ? true : null" (change)="changeSampleUrl(s.url, s.recipe);">
+            <span class="sample-content">
           <span class="sample-title">
             {{ s.name }}
           </span>
@@ -51,30 +51,35 @@
             {{ s.url }}
           </span>
         </span>
-        </label>
+          </label>
+        </div>
+      </div>
+      <div *ngIf="!sampleUrlSelected" class="col-xs-6 source-custom-url">
+        <label for="source-custom-url-field">Enter URL</label>
+        <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field"
+               placeholder="eg. http://example.com/population-jan-2011.json">
+        <div *ngIf="showRecipeDropdown; else recipeInputBox">
+          <label style="padding-top: 10px;" for="source-custom-recipe-url-field">
+            This file contains data from the following country: (only countries with a
+            <a target="_blank" href="https://public.tableau.com/profile/ocha.field.information.services#!/vizhome/COD-Status_1/DetailedEvaluation">COD</a> "live" service are listed)
+          </label>
+          <select class="form-control countries-dropdown" [(ngModel)]="selectedRecipeUrl">
+            <option *ngFor="let country of countries;" [value]="country.url" [selected]="country.url === selectedRecipeUrl">
+              {{country.name}}
+            </option>
+          </select>
+        </div>
+        <ng-template #recipeInputBox>
+          <label style="padding-top: 10px;" for="source-custom-recipe-url-field">Enter Recipe</label>
+          <input [(ngModel)]="selectedRecipeUrl" name="selectedRecipeUrl" class="wizard-input" id="source-custom-recipe-url-field"
+                 placeholder="eg. http://example.com/population-jan-2011.json">
+        </ng-template>
       </div>
     </div>
-    <div *ngIf="!sampleUrlSelected" class="col-xs-9 source-custom-url">
-      <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
-      <label for="source-custom-url-field">Enter URL</label>
-      <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field"
-        placeholder="eg. http://example.com/population-jan-2011.json">
-      <div *ngIf="showRecipeDropdown; else recipeInputBox">
-        <label style="padding-top: 10px;" for="source-custom-recipe-url-field">
-          This file contains data from the following country: (only countries with a
-          <a target="_blank" href="https://public.tableau.com/profile/ocha.field.information.services#!/vizhome/COD-Status_1/DetailedEvaluation">COD</a> "live" service are listed)
-        </label>
-        <select class="form-control countries-dropdown" [(ngModel)]="selectedRecipeUrl">
-          <option *ngFor="let country of countries;" [value]="country.url" [selected]="country.url === selectedRecipeUrl">
-            {{country.name}}
-          </option>
-        </select>
+    <div class="row" *ngIf="hxlCheckError">
+      <div class="col-xs-offset-3 col-xs-6">
+        <div class="alert alert-danger" role="alert"> {{ hxlCheckError }}</div>
       </div>
-      <ng-template #recipeInputBox>
-        <label style="padding-top: 10px;" for="source-custom-recipe-url-field">Enter Recipe</label>
-        <input [(ngModel)]="selectedRecipeUrl" name="selectedRecipeUrl" class="wizard-input" id="source-custom-recipe-url-field"
-          placeholder="eg. http://example.com/population-jan-2011.json">
-      </ng-template>
     </div>
   </div>
   <div class="paddingDoubleRowHack customize-section">
@@ -86,9 +91,9 @@
             Choose the ways to check your data.
           </div>
         </div>
-        <div class="col-xs-9">
+        <div class="col-xs-6">
           <div class="row">
-            <div style="padding: 0 15px; max-width: 830px; width: 100%; margin-top: 32px;">
+            <div class="col-xs-12">
               <div class="filters">
                 <div class="filters-title">
                   Validation rules
@@ -99,51 +104,40 @@
                 </div>
                 <div class="filters-content">
                   <ul class="row">
-                    <!-- <li class="col-xs-6">
-                      <label
-                      tooltip="For a column with HXL tag indicating it contains p-codes, check the value in each cell is a p-code that can be found in the ITOS service.">
-                      Check for valid p-codes</label>
-                    </li>
-                    <li class="col-xs-6">
-                      <label
-                        tooltip="For a column with HXL tag indicating it contains admin unit names, check the value in each cell is an admin unit name that can be found in the ITOS service.">
-                        Check for valid admin unit names</label>
-                    </li>
-                    <li class="col-xs-6">
-                      <label
-                        tooltip="For a column with HXL tag indicating it contains admin unit names and another with HXL tag indicating it contains p-codes, check the values in corresponding cells are consistent by comparing with the ITOS service.">
-                        Check for consistent p-code and name combinations</label>
-                    </li>
-                    <li class="col-xs-6">
-                      <label
-                        tooltip="Check each cell has the same data type as the majority of others a column.">
-                        Check for consistent data types</label>
-                    </li>
-                    <li class="col-xs-6">
-                      <label
-                        tooltip="Check each cell for leading and trailing white spaces and for more than one white space between words">
-                        Check for white space errors</label>
-                    </li>
-                    <li class="col-xs-6">
-                      <label
-                        tooltip="Check each cell in a column against a list of allowed values which you supply. NOT ENABLED YET">
-                        Check against your own list of allowed values (coming soon)</label>
-                    </li> -->
-                     <!-- THIS WILL BE USED ONCE WE LOAD THE RULES FROM THE RECIPE -->
-                      <li class="col-xs-6" *ngFor="let ruleType of ruleTypes;">
+                    <li class="col-xs-6" *ngFor="let ruleType of ruleTypes;">
                       <label tooltip="{{ruleType.description}}">
                         <input type="checkbox" [(ngModel)]="ruleType.enabled" (change)="onRuleTypeChange(ruleType)"> {{ ruleType.name }}
                       </label>
-                      </li>
-
-
+                    </li>
+                    <li class="col-xs-6">
+                      <label tooltip="">
+                        <input type="checkbox" [(ngModel)]="customValidation" (change)="onTriggerCustomValidation()"> Check against your own list of allowed values
+                      </label>
+                    </li>
                   </ul>
                 </div>
-                <!-- <div class="coming-soon">
-                  <div class="coming-soon-text">
-                    Coming Soon
-                  </div>
-                </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xs-3" *ngIf="customValidation">
+          <div class="filters custom-filter">
+            <div class="filters-title">
+              Custom Validation rules
+            </div>
+            <div class="filters-content">
+              <div class="custom-list" *ngFor="let item of customValidationList; let idx = index;">
+                <div class="custom-list-title">Custom list {{ idx + 1}}</div>
+                <div class="custom-list-values">
+                  <input class="" type="text" [(ngModel)]="item.values" (blur)="rulesRecheck()"
+                         placeholder="Enter comma separated list, eg: item1,item2,item3">
+                  <i *ngIf="idx == 0" (click)="onAddNewCustomValidation()" class="glyphicon glyphicon-plus"></i>
+                  <i *ngIf="idx > 0" (click)="onRemoveCustomValidation(idx)" class="glyphicon glyphicon-minus"></i>
+                  <select (change)="onCustomValidationTagChange(item, $event);">
+                    <option disabled="disabled" selected>Select column</option>
+                    <option *ngFor="let item of dataTitle; let idx = index;" [value]="dataHXLTags[idx]">{{ item }} ({{ dataHXLTags[idx] }})</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
