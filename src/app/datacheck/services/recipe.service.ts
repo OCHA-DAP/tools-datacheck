@@ -1,4 +1,4 @@
-import { HxlproxyService } from './hxlproxy.service';
+import { HxlproxyService, PostParam } from './hxlproxy.service';
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
@@ -34,23 +34,35 @@ export class RecipeService {
     return types;
   }
 
-  public validateData(selectedUrl: string, recipeTemplate: string,
+  public validateData(selectedUrl: string, selectedFile: File, recipeTemplate: string,
                   recipeParams?: { [s: string]: string; }): Observable<any> {
 
-    const url = selectedUrl;
-    // const schemaUrl = this.selectedRecipeUrl;
-    const params = [
-      {
-        key: 'url',
-        value: url
-      }
-    ];
-    const postParams = [
+    const params = [];
+    const postParams: PostParam[] = [
       {
         key: 'schema_content',
-        value: recipeTemplate
+        value: recipeTemplate,
+        type: 'json-as-file'
+      },
+      {
+        key: 'include_dataset',
+        value: 'true',
+        type: 'text'
       }
     ];
+    if (selectedFile) {
+      postParams.push({
+          key: 'content',
+          value: selectedFile,
+          type: 'file'
+      });
+    } else if (selectedUrl) {
+      postParams.push({
+        key: 'url',
+        value: selectedUrl,
+        type: 'text'
+      });
+    }
     const validationResult = this.hxlProxyService.makeValidationCall(params, postParams);
     return validationResult;
   }

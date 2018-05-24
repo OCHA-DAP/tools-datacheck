@@ -8,6 +8,7 @@ import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output, View
 export class DragDropUploadComponent implements OnInit {
 
   highlight = false;
+  filename = null;
 
   @Output('selected') selected = new EventEmitter();
   @ViewChild('fileInput') fileInput:ElementRef;
@@ -27,7 +28,9 @@ export class DragDropUploadComponent implements OnInit {
   onDrop(event) {
     event.preventDefault();
     this.highlight = false;
-    this.selected.emit(event.dataTransfer.files[0]);
+    const file = event.dataTransfer.files[0];
+    this.filename = file.name;
+    this.selected.emit(file);
   }
   onSelect(event) {
     this.selected.emit(event.target.files[0]);
