@@ -33,7 +33,7 @@ const DEFAULT_RECIPE = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai
 export class ImportComponent implements OnInit {
 
   readonly stepName = 'Import Data';
-  dataSource = 'upload';
+  dataSource = 'sample';
   hxlCheckError: any = null;
   _selectedUrl = '';
   _selectedRecipeUrl: string;
