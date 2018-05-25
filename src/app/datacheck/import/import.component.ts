@@ -448,7 +448,7 @@ export class ImportComponent implements OnInit {
     this.validateData();
   }
 
-  protected onSelectDeselectRuleTypes(selected: boolean) {
+  public onSelectDeselectRuleTypes(selected: boolean) {
     this.ruleTypes.forEach(ruleType => ruleType.enabled = selected);
     this.validateData();
   }
