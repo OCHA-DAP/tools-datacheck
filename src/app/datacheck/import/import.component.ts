@@ -593,6 +593,7 @@ export class ImportComponent implements OnInit {
   }
 
   private resetErrors() {
+    this.hxlCheckError = null;
     this.errorReport = null;
     this.errorsXY = {};
     this.errorList = [];
@@ -612,10 +613,11 @@ export class ImportComponent implements OnInit {
 
   onTriggerCustomValidation() {
     if (this.customValidation) {
-      if (this.customValidationList == null) {
-        this.customValidationList = [];
-        this.onAddNewCustomValidation();
-      }
+      this.customValidationList = [];
+      this.onAddNewCustomValidation();
+    } else {
+      this.customValidationList = [];
+      this.rulesRecheck();
     }
   }
 
