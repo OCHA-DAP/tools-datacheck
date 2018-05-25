@@ -85,7 +85,7 @@ export class ImportComponent implements OnInit {
   showRecipeDropdown = true;
 
   showLoadingOverlay = false;
-  loadingOverlayText = 'Loading data and running checks ...';
+  loadingOverlayText = '';
 
   customValidation = false;
   customValidationList: Array<any> = null;
@@ -335,6 +335,7 @@ export class ImportComponent implements OnInit {
   }
 
   protected reloadDataAndValidate() {
+    this.loadingOverlayText = 'Loading data and running checks ...';
     this.showLoadingOverlay = true;
     this.errorsXY = {};
     this.hxlCheckError = null;
@@ -421,6 +422,25 @@ export class ImportComponent implements OnInit {
       this.hotInstance.loadData(this.data);
       this.updateErrorList();
       this.showLoadingOverlay = false;
+    }, (error) => {
+      const baseErrorMsg = '. If the problem persists, try again later or drop us a line at hdx.feedback@gmail.com';
+      this.loadingOverlayText = 'Something went wrong' + baseErrorMsg;
+      if (error.source_status_code === 404) {
+        this.hxlCheckError = 'The provided data source couldn\'t be found or read, please verify it is correct'
+              + baseErrorMsg;
+      } else if (error.status === 403) {
+        this.hxlCheckError = error.message + baseErrorMsg;
+      } else if (error.status === 500 && error.error === 'UnicodeDecodeError') {
+        this.hxlCheckError =
+          'The provided data source is not a csv, xls or xlsx or couldn\'t be read. Please verify your data source'
+          + baseErrorMsg;
+      }
+
+      if (!this.hxlCheckError) {
+        this.hxlCheckError =
+          'Sorry, an unexpected has error occurred! Please pass this error report to our support team: '
+          + JSON.stringify(error) + baseErrorMsg;
+      }
     });
   }
 
@@ -474,6 +494,7 @@ export class ImportComponent implements OnInit {
   }
   changeDatasource($event) {
     this.dataSource = $event.target.value;
+    this.hxlCheckError = null;
   }
 
   changeSampleUrl(url: string, recipe: string, noReload?: boolean) {

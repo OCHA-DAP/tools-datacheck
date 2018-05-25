@@ -38,7 +38,7 @@
         </div>
       </div>
       <div *ngIf="dataSource == 'upload'" class="col-xs-6 source-upload">
-        <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
+        <!-- <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div> -->
         <hdx-drag-drop-upload (selected)="onFileUpload($event)"></hdx-drag-drop-upload>
         <div class="source-upload-note">Note: If your spreadsheet has multiple tabs, only the data from the first tab will be imported.</div>
       </div>
@@ -61,7 +61,7 @@
         </div>
       </div>
       <div *ngIf="dataSource == 'url'" class="col-xs-6 source-custom-url">
-        <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div>
+        <!-- <div *ngIf="hxlCheckError" class="alert alert-danger" role="alert" [innerHTML]="hxlCheckError.fullErrorMessage"></div> -->
         <label for="source-custom-url-field">Enter URL</label>
         <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field"
                placeholder="eg. http://example.com/population-jan-2011.json">
