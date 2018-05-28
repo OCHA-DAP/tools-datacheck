@@ -82,6 +82,7 @@ export class ImportComponent implements OnInit {
   showFilters = true;
 
   countries = [];
+  urlToIso3Map = {};
   showRecipeDropdown = true;
 
   showLoadingOverlay = false;
@@ -114,13 +115,16 @@ export class ImportComponent implements OnInit {
     this.countries = COUNTRIES.map( c => {
       return {
         name: c.name,
-        url: `${BASE_URL}/pcodes/validation-schema-pcodes-${c.iso3}.json`
+        url: `${BASE_URL}/pcodes/validation-schema-pcodes-${c.iso3}.json`,
+        iso3: c.iso3
       };
     });
     this.countries.push({
       name: 'No country',
-      url: `${BASE_URL}/basic-validation-schema.json`
+      url: `${BASE_URL}/basic-validation-schema.json`,
+      iso3: 'none'
     });
+    this.countries.forEach(c => this.urlToIso3Map[c.url] = c.iso3);
   }
 
   get selectedUrl(): string {
@@ -368,10 +372,19 @@ export class ImportComponent implements OnInit {
   }
 
   private validateData() {
+    const iso3 = this.urlToIso3Map[this.selectedRecipeUrl];
+    const analyticsInfo = {
+      datasourceType: this.dataSource,
+      datasourceUrl: this.dataSource === 'upload' ?  this.selectedFile.name : this.selectedUrl,
+      validations: this.getSelectedRuleTypes(),
+      locations: iso3 ? [iso3] : []
+    };
+
     this.showLoadingOverlay = true;
     this.resetErrors();
     const selectedRules = this.selectedRules.slice(0);
     if (this.customValidationList) {
+      analyticsInfo.validations.push('Custom lists');
       this.customValidationList.forEach((val, idx) => {
         if (val.values && val.tag) {
           const values = val.values.replace(/,/g, '|');
@@ -401,7 +414,9 @@ export class ImportComponent implements OnInit {
       validationObs = Observable.of(null);
     }
     validationObs.subscribe(report => {
+      let errNum = 0;
       if (report) {
+        errNum = report.stats.total;
         this.data = report.dataset;
         this.dataTitle = this.data[0].slice(0);
         this.dataHXLTags = this.data[1].slice(0);
@@ -417,6 +432,8 @@ export class ImportComponent implements OnInit {
           errorsX[val.row] = val.row;
         });
       }
+      this.analyticsService.trackDataCheck(analyticsInfo.datasourceType, analyticsInfo.datasourceUrl,
+        analyticsInfo.validations, analyticsInfo.locations, errNum);
       console.log('showing errors');
       this.hotInstance.render();
       this.hotInstance.loadData(this.data);
@@ -457,6 +474,16 @@ export class ImportComponent implements OnInit {
     }
 
     return recipeObs;
+  }
+
+  getSelectedRuleTypes(): string[] {
+    const selectedRuleTypes: string[] = [];
+    this.ruleTypesMap.forEach( ruleType => {
+      if (ruleType.enabled) {
+        selectedRuleTypes.push(ruleType.name);
+      }
+    });
+    return selectedRuleTypes;
   }
 
   protected onRuleTypeChange(ruleType: RuleType) {

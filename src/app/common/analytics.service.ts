@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AnalyticsService as GenericAnalyticsService, GA_PAGEVIEW } from 'hxl-preview-ng-lib';
+import { AnalyticsService as GenericAnalyticsService, GA_PAGEVIEW, GaExtras } from 'hxl-preview-ng-lib';
 import { environment } from './../../environments/environment';
 
 declare const window: any;
@@ -19,39 +19,37 @@ export class AnalyticsService {
     this.genericAnalyticsService.init(gaToken, mpToken);
   }
 
-  public trackStepLoad(stepName: string, firstStep: boolean, lastStep: boolean,
-            dataSourceUrl?: string, recipeUrl?: string, error?: string, additionalMpData?: {[s: string]: string|boolean|number}) {
+
+  /**
+   *
+   * @param datasourceType sample / upload / url
+   * @param datasourceUrl url or filename in case of upload
+   * @param validations list of checks performed
+   * @param locations list of iso3 codes that were used in locations checks
+   * @param errNum number of errors
+   */
+  public trackDataCheck(datasourceType: string, datasourceUrl, validations: string[], locations: string[],
+          errNum: number) {
 
     const mpData = {
-      'workflow': 'quickcharts',
-      'step name': stepName,
-      'first step': firstStep,
-      'last step': lastStep,
+      'data source type': datasourceType,
+      'data source url': datasourceUrl,
+      'validations': validations,
+      'locations': locations
     };
-    if (additionalMpData) {
-      Object.assign(mpData, additionalMpData);
-    }
-    if (dataSourceUrl) {
-      mpData['data source url'] = dataSourceUrl;
-    }
-    if (recipeUrl) {
-      mpData['recipe url'] = recipeUrl;
-    }
-    if (error) {
-      mpData['error'] = error;
-    }
 
-    this.genericAnalyticsService.trackEventCategory('load step', {action: stepName}, mpData);
-
-  }
-
-  public trackRecipeChanged(dataSourceUrl: string, recipeUrl: string, bitesNum: number) {
-    const mpData = {
-      'data source url': dataSourceUrl,
-      'recipe url': recipeUrl,
-      'number of bites': bitesNum,
+    const gaData: GaExtras = {
+      label: datasourceUrl,
+      action: 'validate',
+      value: errNum,
+      dimensionInfo: {
+        'dimension2': datasourceType
+      }
     };
-    this.genericAnalyticsService.trackEventCategory('recipe apply', {action: recipeUrl, value: bitesNum}, mpData);
+
+
+    this.genericAnalyticsService.trackEventCategory('data check', gaData, mpData);
+
   }
 
 }
