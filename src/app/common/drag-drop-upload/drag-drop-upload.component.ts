@@ -11,7 +11,7 @@ export class DragDropUploadComponent implements OnInit {
   filename = null;
 
   @Output('selected') selected = new EventEmitter();
-  @ViewChild('fileInput') fileInput:ElementRef;
+  @ViewChild('fileInput') fileInput: ElementRef;
 
   constructor() { }
 
@@ -33,7 +33,9 @@ export class DragDropUploadComponent implements OnInit {
     this.selected.emit(file);
   }
   onSelect(event) {
-    this.selected.emit(event.target.files[0]);
+    const file = event.target.files[0];
+    this.filename = file.name;
+    this.selected.emit(file);
   }
 
   ngOnInit() {
