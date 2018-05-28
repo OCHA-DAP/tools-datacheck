@@ -232,7 +232,9 @@
             <div *ngIf="showLoadingOverlay" class="coming-soon">
               <div class="coming-soon-text">
                 {{loadingOverlayText}}
+                <img *ngIf="showLoadingDots" src="./assets/loading-dots.gif" style="margin-top: 7px; height: 10px; margin-left: 5px;">
               </div>
+
             </div>
           </div>
         </div>

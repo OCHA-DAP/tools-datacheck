@@ -97,6 +97,7 @@ export class ImportComponent implements OnInit {
   public dataTitle: string[];
   public dataHXLTags: string[];
   public customValidationChoices: string[];
+  private showLoadingDots = false;
 
 
   constructor(private router: Router, private route: ActivatedRoute,
@@ -335,10 +336,13 @@ export class ImportComponent implements OnInit {
   }
 
   protected reloadDataAndValidate() {
-    this.loadingOverlayText = 'Loading data and running checks ...';
+    this.loadingOverlayText = 'Loading data and running checks';
+    this.showLoadingDots = true;
     this.showLoadingOverlay = true;
     this.errorsXY = {};
     this.hxlCheckError = null;
+    this.selectedRow = null;
+    this.selectedColumn = null;
     // const dataObservable = this.getData();
     // dataObservable.subscribe((data) => {
     //   this.dataTitle = data[0].slice(0);
@@ -425,6 +429,7 @@ export class ImportComponent implements OnInit {
     }, (error) => {
       const baseErrorMsg = '. If the problem persists, try again later or drop us a line at hdx.feedback@gmail.com';
       this.loadingOverlayText = 'Something went wrong' + baseErrorMsg;
+      this.showLoadingDots = false;
       if (error.source_status_code === 404) {
         this.hxlCheckError = 'The provided data source couldn\'t be found or read, please verify it is correct'
               + baseErrorMsg;
@@ -466,11 +471,14 @@ export class ImportComponent implements OnInit {
 
   protected rulesRecheck() {
     this.validateData();
+    //here
+    this.selectedColumn = null;
+    this.selectedRow = null;
   }
 
   public onSelectDeselectRuleTypes(selected: boolean) {
     this.ruleTypes.forEach(ruleType => ruleType.enabled = selected);
-    this.validateData();
+    this.rulesRecheck();
   }
 
   // private getData(): Observable<any> {
