@@ -495,6 +495,7 @@ export class ImportComponent implements OnInit {
   changeDatasource($event) {
     this.dataSource = $event.target.value;
     this.hxlCheckError = null;
+    this._selectedUrl = null;
   }
 
   changeSampleUrl(url: string, recipe: string, noReload?: boolean) {
