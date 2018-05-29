@@ -439,6 +439,8 @@ export class ImportComponent implements OnInit {
         this.hxlCheckError =
           'The provided data source is not a csv, xls or xlsx or couldn\'t be read. Please verify your data source'
           + baseErrorMsg;
+      } else if (error.status === 500 && error.error === 'AttributeError') {
+        this.hxlCheckError = 'Please check that you selected an URL or uploaded a file' + baseErrorMsg;
       }
 
       if (!this.hxlCheckError) {
