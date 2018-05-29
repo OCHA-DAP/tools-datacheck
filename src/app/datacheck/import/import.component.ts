@@ -460,6 +460,8 @@ export class ImportComponent implements OnInit {
         this.hxlCheckError = 'Please check that you selected an URL or uploaded a file' + baseErrorMsg;
       } else if (error.status === 500 && error.error === 'HXLTagsNotFoundException') {
         this.hxlCheckError = 'HXL tags not found in first 25 rows of the data' + baseErrorMsg;
+      } else if (error.isTrusted === true && error.type === 'error') {
+        this.hxlCheckError = 'Server Error' + baseErrorMsg;
       }
 
       if (!this.hxlCheckError) {
