@@ -66,12 +66,6 @@
         <label for="source-custom-url-field">Enter URL</label>
         <input [(ngModel)]="selectedUrl" name="selectedUrl" class="wizard-input" id="source-custom-url-field"
                placeholder="eg. http://example.com/population-jan-2011.json">
-
-        <ng-template #recipeInputBox>
-          <label style="padding-top: 10px;" for="source-custom-recipe-url-field">Enter Recipe</label>
-          <input [(ngModel)]="selectedRecipeUrl" name="selectedRecipeUrl" class="wizard-input" id="source-custom-recipe-url-field"
-                 placeholder="eg. http://example.com/population-jan-2011.json">
-        </ng-template>
       </div>
     </div>
     <div class="row" *ngIf="hxlCheckError">
@@ -103,6 +97,12 @@
                   </option>
                 </select>
               </div>
+              <ng-template #recipeInputBox>
+                <label style="padding-top: 10px;" for="source-custom-recipe-url-field">Enter Recipe</label>
+                <input [(ngModel)]="selectedRecipeUrl" name="selectedRecipeUrl" class="wizard-input" id="source-custom-recipe-url-field"
+                       placeholder="eg. http://example.com/population-jan-2011.json">
+              </ng-template>
+
             </div>
             <div class="col-xs-12">
               <div class="filters">
