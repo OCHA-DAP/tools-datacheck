@@ -115,7 +115,9 @@
 
   .error-top-section {
     position: absolute;
-    top: @navigationMargin; left: @errorReportPadding;
+    top: @navigationMargin;
+    left: 0;
+    padding: 0 @errorReportPadding;
     width: 100%;
     z-index:101;
   }
@@ -151,6 +153,9 @@
   .error-title {
     .sourceSansProFont(700, 18px);
     margin: @errorTitleTopMargin 0 @errorTitleBottomMargin;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
   .error-list-container {
     position: absolute;
