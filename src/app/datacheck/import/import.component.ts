@@ -461,12 +461,12 @@ export class ImportComponent implements OnInit {
       } else if (error.status === 500 && error.error === 'HXLTagsNotFoundException') {
         this.hxlCheckError = 'HXL tags not found in first 25 rows of the data' + baseErrorMsg;
       } else if (error.isTrusted === true && error.type === 'error') {
-        this.hxlCheckError = 'Server Error' + baseErrorMsg;
+        this.hxlCheckError = 'Sorry, an unexpected error has occurred! Please verify your data source' + baseErrorMsg;
       }
 
       if (!this.hxlCheckError) {
         this.hxlCheckError =
-          'Sorry, an unexpected has error occurred! Please pass this error report to our support team: '
+          'Sorry, an unexpected error has occurred! Please pass this error report to our support team: '
           + JSON.stringify(error) + baseErrorMsg;
       }
     });
