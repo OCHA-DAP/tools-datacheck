@@ -535,6 +535,13 @@ export class ImportComponent implements OnInit {
   }
   changeDatasource($event) {
     this.dataSource = $event.target.value;
+    if (this.dataSource === 'sample') {
+      // "Sierra Leone" - https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/pcodes/validation-schema-pcodes-sle.json
+      this._selectedRecipeUrl = 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/pcodes/validation-schema-pcodes-sle.json';
+    } else {
+      // "No country" - https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/basic-validation-schema.json
+      this._selectedRecipeUrl = 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/basic-validation-schema.json';
+    }
     this.hxlCheckError = null;
     this._selectedUrl = null;
   }
