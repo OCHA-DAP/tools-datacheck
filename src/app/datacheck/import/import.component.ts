@@ -133,7 +133,7 @@ export class ImportComponent implements OnInit {
   }
 
   set selectedUrl(selectedUrl: string) {
-    this._selectedUrl = selectedUrl;
+    this._selectedUrl = selectedUrl ? selectedUrl.trim() : selectedUrl;
     // this.embedUrl = null;
     this.reloadDataAndValidate();
   }
