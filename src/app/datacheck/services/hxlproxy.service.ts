@@ -19,7 +19,8 @@ export class HxlproxyService {
     const mapFunction = (response: Response) => {
       const json = response.json();
       let locations = [];
-      json.issues = json.issues.sort( (a, b) => a.description > (b.description));
+      json.issues = json.issues.sort((a, b) => a.description.substring(a.description.length - 2, a.description.length - 1) >
+        b.description.substring(b.description.length - 2, b.description.length - 1));
       for (let i = 0; i < json.issues.length; i++) {
         const issue = json.issues[i];
         issue.locations.sort( (el1, el2) => el1.row - el2.row );
