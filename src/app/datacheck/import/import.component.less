@@ -2,6 +2,9 @@
 
 @sampleItemPadding: 10px;
 @sampleItemRadioSize: 20px;
+@topReportHeight: 40vh;
+@lineHeight: 20px;
+
 .sample-item {
   position: relative;
   max-width: 800px;
@@ -102,14 +105,21 @@
 .error-report {
   @errorReportPadding: 30px;
   @navigationMargin: 15px;
-  padding: @errorReportPadding @errorReportPadding @navigationMargin;
+  line-height: @lineHeight;
+  padding: @navigationMargin @errorReportPadding;
   background-color: @darkGrayColor;
   border-radius: 5px;
-  margin-bottom: 30px;
   color: @whiteColor;
-  hr {
-    margin: @navigationMargin -@errorReportPadding;
-    border-top-color: @grayColor;
+  height: @topReportHeight;
+  position: relative;
+
+  .error-top-section {
+    position: absolute;
+    top: @navigationMargin;
+    left: 0;
+    padding: 0 @errorReportPadding;
+    width: 100%;
+    z-index:101;
   }
   .error-breadcrumb {
     ul {
@@ -138,9 +148,29 @@
     }
   }
 
+  @errorTitleTopMargin: 5px;
+  @errorTitleBottomMargin: 10px;
   .error-title {
     .sourceSansProFont(700, 18px);
-    margin: 5px 0 20px;
+    margin: @errorTitleTopMargin 0 @errorTitleBottomMargin;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .error-list-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: @topReportHeight;
+    padding-top: @navigationMargin + 2*@lineHeight + @errorTitleTopMargin + @errorTitleBottomMargin;
+    padding-left: @errorReportPadding;
+    padding-right: @errorReportPadding;
+    padding-bottom: @navigationMargin + @lineHeight + 2*@navigationMargin + 1px;
+    .error-list {
+      overflow-y: auto;
+      height: 100%;
+      width: 100%;
+    }
   }
   .sectionMargin {
     margin: 10px 0;
@@ -183,6 +213,16 @@
   .navigation {
     .sourceSansProFont(700, 14px);
     .letter-spacing-3();
+    position: absolute;
+    bottom: 0; left: 0;
+    padding-left: @errorReportPadding;
+    padding-right: @errorReportPadding;
+    padding-bottom: @navigationMargin;
+    width: 100%;
+    hr {
+      margin: @navigationMargin -@errorReportPadding;
+      border-top-color: @grayColor;
+    }
 
     a {
       color: @whiteColor;
@@ -205,9 +245,20 @@
 
 
 /deep/ .handsontable {
-  tbody th.ht__highlight, thead th.ht__highlight {
-    background-color: @lightGrayColor;
+  width: 100%;
+  height: 50vh;
+  overflow: hidden;
+
+  tbody {
+    th.ht__highlight, thead th.ht__highlight {
+      background-color: @lightGrayColor;
+    }
+
+    td {
+      white-space: pre;
+    }
   }
+
 
   td.area:before, td.area-1:before, td.area-2:before, td.area-3:before, td.area-4:before, td.area-5:before, td.area-6:before, td.area-7:before {
     background-color: transparent;
@@ -217,27 +268,43 @@
   }
 }
 
+.hot-container {
+  margin-top: 20px;
+}
+
+.error-report-wrapper {
+  .coming-soon .coming-soon-text{
+    top: 30%;
+  }
+}
+
+.coming-soon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 200;
+  background-color: rgba(0, 0, 0, 0.6);
+
+  .coming-soon-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    .gothamBookFont(24px);
+    color: @whiteColor;
+  }
+}
+
 .filters {
   @filtersPadding: 15px;
-  border-radius: 5px 5px 0 0;
-  overflow: hidden;
   position: relative;
+  margin-top: 32px;
 
-  .coming-soon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.5);
-
-    .coming-soon-text {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      .gothamBookFont(24px);
-      color: @whiteColor;
+  &.custom-filter {
+    margin-top: 103px;
+    .filters-content {
+      overflow-y: scroll;
     }
   }
 
@@ -255,6 +322,8 @@
   .filters-content {
     background-color: @whiteColor;
     padding: @filtersPadding;
+    min-height: 130px;
+
     ul {
       padding: 0; margin: 0;
       list-style: none;
@@ -269,4 +338,79 @@
       }
     }
   }
+}
+
+.form-control.countries-dropdown {
+  font-size: initial;
+  color: @darkGrayColor;
+}
+
+.custom-list {
+  & ~ .custom-list {
+    margin-top: 5px;
+  }
+  .custom-list-title {
+    font-size: 12px;
+  }
+
+  .custom-list-values {
+    position: relative;
+    padding-right: 30px;
+
+    input {
+      width: 100%;
+    }
+    i.glyphicon-plus, i.glyphicon-minus {
+      position: absolute;
+      top: 10px;
+      right: 0;
+      color: @blueColor;
+    }
+    select {
+      margin-top: 5px;
+      width: 100%;
+    }
+  }
+}
+
+@inputInnerTextPadding: 15px;
+@inputLineHeight: 20px;
+/deep/ input[type='text'], textarea, select {
+
+  background-color: @whiteColor;
+  width: 100%;
+  border: 1px solid @lightGrayColor;
+  line-height: @inputLineHeight;
+  padding: @inputInnerTextPadding/2 @inputInnerTextPadding;
+
+  .sourceSansProFont(400, 14px);
+  color: @darkGrayColor;
+
+  //border-radius: 6px;
+
+  &::placeholder {
+    color: @lightGrayColor;
+    font-size: 13px;
+  }
+
+  &:focus {
+    border-color: @blueColor;
+    outline: none;
+  }
+}
+
+/deep/ select {
+  height: @inputInnerTextPadding + @inputLineHeight;
+}
+
+.source-upload {
+  .source-upload-note {
+    margin-top: 20px;
+    .sourceSansProFont(400, 14px);
+    color: @darkGrayColor;
+  }
+}
+
+.alert-danger {
+  word-break: break-all;
 }

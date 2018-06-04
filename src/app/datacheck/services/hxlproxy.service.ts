@@ -1,17 +1,26 @@
 import { environment } from './../../../environments/environment';
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { Http, Response, RequestOptions, Headers, URLSearchParams } from '@angular/http';
 
+export interface PostParam {
+  key: string;
+  value: string | File;
+  type: string;
+}
 @Injectable()
 export class HxlproxyService {
 
   constructor(private http: Http) { }
 
-  public makeValidationCall(params: { key: string, value: string }[]): Observable<any> {
+  public makeValidationCall(params: { key: string, value: string }[],
+        postParams: PostParam[]): Observable<any> {
+
     const mapFunction = (response: Response) => {
       const json = response.json();
       let locations = [];
+      json.issues = json.issues.sort((a, b) => a.description.substring(a.description.length - 2, a.description.length - 1) >
+        b.description.substring(b.description.length - 2, b.description.length - 1));
       for (let i = 0; i < json.issues.length; i++) {
         const issue = json.issues[i];
         issue.locations.sort( (el1, el2) => el1.row - el2.row );
@@ -25,19 +34,26 @@ export class HxlproxyService {
       json['flatErrors'] = locations;
       return json;
     };
-    const serverUrl = `${environment['hxlProxyValidate']}?`;
-    return this.makeCallToHxlProxy<any[]>(serverUrl, params, mapFunction);
+    const serverUrl = `${environment['hxlProxyValidate']}`;
+    return this.makeCallToHxlProxy<any[]>(serverUrl, params, postParams, mapFunction);
   }
 
-  public makeDataCall(params: { key: string, value: string }[]): Observable<any[][]> {
-    const mapFunction = (response: Response) => {
-      const json = response.json();
-      return json;
-    };
+  // public makeDataCall(params: { key: string, value: string }[]): Observable<any[][]> {
+  //   const mapFunction = (response: Response) => {
+  //     const json = response.json();
+  //     return json;
+  //   };
 
-    const serverUrl = `${environment['hxlProxy']}?`;
-    return this.makeCallToHxlProxy<any[]>(serverUrl, params, mapFunction);
-  }
+  //   // Force the proxy to not use cache (useful for the case when the user has fixed his data)
+  //   params = params ? params : [];
+  //   params.push({
+  //     key: 'force',
+  //     value: 'on'
+  //   });
+
+  //   const serverUrl = `${environment['hxlProxy']}?`;
+  //   return this.makeCallToHxlProxy<any[]>(serverUrl, params, null, mapFunction);
+  // }
 
   /**
    * Makes a call to the hxl proxy
@@ -46,15 +62,9 @@ export class HxlproxyService {
    * @param errorHandler error handling function
    */
   private makeCallToHxlProxy<T>(serverUrl: string, params: { key: string, value: string }[],
+    postParams: PostParam[],
     mapFunction: (response: Response) => T,
     errorHandler?: () => Observable<T>): Observable<T> {
-
-    // let myMapFunction: (response: Response) => T;
-    // if (mapFunction) {
-    //   myMapFunction = mapFunction;
-    // } else {
-    //   myMapFunction = (response: Response) => response.json();
-    // }
 
     let url = serverUrl;
     if (params) {
@@ -62,8 +72,26 @@ export class HxlproxyService {
         url += '&' + params[i].key + '=' + encodeURIComponent(params[i].value);
       }
     }
-    console.log('The call will be made to: ' + url);
-    return this.http.get(url).map(mapFunction.bind(this)).catch(err => this.handleError(err, errorHandler));
+    let response: Observable<Response> = null;
+    if (postParams) {
+      const formData: any = new FormData();
+      // const postString = postParams.reduce(
+      //       (acc, p, i) => acc + (i > 0 ? '&' : '')  + p.key + '=' + encodeURIComponent(p.value), '');
+      postParams.forEach(par => {
+        if (par.type === 'json-as-file') {
+          formData.append(par.key, new Blob([par.value], { type: 'application/json'}), `${par.key}.json`);
+        } else {
+          formData.append(par.key, par.value);
+        }
+      });
+
+      // const headers = new Headers({ 'Content-Type': 'multipart/form-data' });
+      // const options = new RequestOptions({ headers: headers });
+      response = this.http.post(url, formData);
+    } else {
+      response = this.http.get(url);
+    }
+    return response.map(mapFunction.bind(this)).catch(err => this.handleError(err, errorHandler));
   }
 
   private handleError (error: Response | any, errorHandler?: () => Observable<any>) {
@@ -72,7 +100,7 @@ export class HxlproxyService {
       try {
         const body = error.json() || '';
         const err = body.error || JSON.stringify(body);
-        errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+        errMsg = body; // `${error.status} - ${error.statusText || ''} ${err}`;
       } catch (e) {
         errMsg = e.toString();
       }

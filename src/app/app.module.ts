@@ -1,3 +1,4 @@
+import { RecipeService } from './datacheck/services/recipe.service';
 import { ConfigService } from './datacheck/config.service';
 import { HxlproxyService } from './datacheck/services/hxlproxy.service';
 import { BrowserModule } from '@angular/platform-browser';
@@ -15,6 +16,7 @@ import { AnalyticsService } from './common/analytics.service';
 import { SimpleModule } from 'hxl-preview-ng-lib';
 import { HttpService } from './shared/http.service';
 import { HotTableModule } from '@handsontable/angular';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
 
 export const HTTP_SERVICE_PROVIDERS: any = {
   provide: Http,
@@ -40,12 +42,14 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions) {
     HttpModule,
     AppRoutingModule,
     FormsModule,
-    HotTableModule.forRoot()
+    HotTableModule.forRoot(),
+    TooltipModule.forRoot()
   ],
   providers: [
     HTTP_SERVICE_PROVIDERS,
     HxlproxyService,
-    ConfigService
+    ConfigService,
+    RecipeService
   ],
   bootstrap: [AppComponent]
 })
