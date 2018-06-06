@@ -17,6 +17,9 @@ export class GooglepickerDirective {
   readonly scope = ['https://www.googleapis.com/auth/drive.readonly'];
 
   pickerApiLoaded = false;
+
+  picker = null;
+
   oauthToken;
   @Output()
   urlSelect = new EventEmitter<string>();
@@ -27,7 +30,6 @@ export class GooglepickerDirective {
 
   @HostListener('click')
   loadGooglePicker() {
-    let picker = null;
     const onAuthApiLoad = function () {
       gapi.auth.authorize(
           {
@@ -52,13 +54,13 @@ export class GooglepickerDirective {
 
     const createPicker = function () {
       if (this.pickerApiLoaded && this.oauthToken) {
-        picker = new google.picker.PickerBuilder().
+        this.picker = new google.picker.PickerBuilder().
             addView(google.picker.ViewId.DOCS).
             setOAuthToken(this.oauthToken).
             setDeveloperKey(this.developerKey).
             setCallback(pickerCallback).
             build();
-        picker.setVisible(true);
+        this.picker.setVisible(true);
       }
     }.bind(this);
 
@@ -75,12 +77,16 @@ export class GooglepickerDirective {
         // console.log(message);
         this.urlSelect.emit(url);
         this.cd.detectChanges();
-        picker.setVisible(false);
+        this.picker.setVisible(false);
       }
     }.bind(this);
 
-    gapi.load('auth', {'callback': onAuthApiLoad});
-    gapi.load('picker', {'callback': onPickerApiLoad});
+    if (!this.picker) {
+      gapi.load('auth', {'callback': onAuthApiLoad});
+      gapi.load('picker', {'callback': onPickerApiLoad});
+    } else {
+      this.picker.setVisible(true);
+    }
   }
 
 }
