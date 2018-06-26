@@ -3,16 +3,12 @@ import { COUNTRIES } from './../helpers/constants';
 import { ConfigService } from './../config.service';
 import { HxlproxyService } from './../services/hxlproxy.service';
 import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
-import { GooglepickerDirective } from '../../common/googlepicker.directive';
-import { DropboxchooserDirective } from '../../common/dropboxchooser.directive';
 import {
   Component,
   OnInit,
-  ChangeDetectorRef,
   ViewChild,
-  HostListener,
   ElementRef,
-  AfterViewInit, Renderer
+  TemplateRef
 } from '@angular/core';
 import { AnalyticsService } from '../../common/analytics.service';
 import { HttpService } from '../../shared/http.service';
@@ -21,6 +17,7 @@ import { Http } from '@angular/http';
 import * as Handsontable from 'handsontable';
 import { HotTableRegisterer } from '@handsontable/angular';
 import { Observable } from 'rxjs/Observable';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap';
 
 
 const DEFAULT_RECIPE = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
@@ -99,6 +96,7 @@ export class ImportComponent implements OnInit {
   public dataHXLTags: string[];
   public customValidationChoices: string[];
   private showLoadingDots = false;
+  modalRef: BsModalRef;
 
 
   constructor(private router: Router, private route: ActivatedRoute,
@@ -108,7 +106,8 @@ export class ImportComponent implements OnInit {
               private hxlProxyService: HxlproxyService,
               private configService: ConfigService,
               private recipeService: RecipeService,
-              private elRef: ElementRef) {
+              private elRef: ElementRef,
+              private modalService: BsModalService) {
 
     this.httpService = <HttpService> http;
 
@@ -711,4 +710,13 @@ export class ImportComponent implements OnInit {
     this.selectedFile = file;
     this.reloadDataAndValidate();
   }
+
+  openModal(template: TemplateRef<any>) {
+    const config = {
+      animated: false
+    };
+
+    this.modalRef = this.modalService.show(template, config);
+  }
+
 }

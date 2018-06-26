@@ -17,6 +17,8 @@ import { SimpleModule } from 'hxl-preview-ng-lib';
 import { HttpService } from './shared/http.service';
 import { HotTableModule } from '@handsontable/angular';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { ModalModule } from 'ngx-bootstrap';
 
 export const HTTP_SERVICE_PROVIDERS: any = {
   provide: Http,
@@ -36,6 +38,8 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions) {
     ImportComponent
   ],
   imports: [
+    ModalModule.forRoot(),
+    BsDropdownModule.forRoot(),
     SimpleModule,
     CommonModule,
     BrowserModule,
