@@ -414,3 +414,25 @@
 .alert-danger {
   word-break: break-all;
 }
+/deep/ .modal.in {
+  .modal-dialog {
+    width: 900px;
+
+    .close {
+      position: absolute;
+      right: -30px;
+      top: -40px;
+      font-size: 40px;
+      opacity: 1;
+      color: white;
+    }
+    .modal-content {
+      box-shadow: none;
+      border: none;
+      border-radius: 0;
+      min-height: auto;
+      min-width: auto;
+      height: 560px;
+    }
+  }
+}
