@@ -5,7 +5,7 @@
         <div class="col-xs-9">
           <div class="title">{{stepName}}</div>
           <div class="description">
-            Import a <a href="https://tools.humdata.org/examples/hxl/" target="_blankfe">HXL-tagged</a> spreadsheet or CSV file . Then, scroll down to preview and customize. Supported formats: <strong>CSV, XLS and XLSX (not TSV)</strong>.
+            Supported formats: <strong>CSV, XLS and XLSX (not TSV)</strong>. The file size cannot exceed 20MB. Learn more about how to use Data Check <a (click)="openModal(dataCheckTemplate)">here</a>.
           </div>
         </div>
         <span class="btn-actions">
@@ -236,3 +236,13 @@
     </div>
   </div>
 </div>
+
+<ng-template #dataCheckTemplate>
+  <div class="modal-dialog" role="document">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalRef.hide()"> <span aria-hidden="true">&times;</span></button>
+    <div class="modal-content">
+      <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQmqK3qgUchHmZ5YQ8M-ktJ0UccIDeBeuqAqjIAbZ2HIXfmZ5OdqFRb7AM1YJI6N1vmimBAbOVa7QMe/embed?start=false&loop=false&delayms=3000" frameborder="0" width="900" height="560" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+    </div>
+  </div>
+</ng-template>
+
