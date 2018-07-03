@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { AnalyticsService } from '../../common/analytics.service';
 import { HttpService } from '../../shared/http.service';
-import { DomSanitizer} from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Http } from '@angular/http';
 import * as Handsontable from 'handsontable';
 import { HotTableRegisterer } from '@handsontable/angular';
@@ -97,6 +97,7 @@ export class ImportComponent implements OnInit {
   public customValidationChoices: string[];
   private showLoadingDots = false;
   modalRef: BsModalRef;
+  dataCheckDemoUrl: SafeResourceUrl = null;
 
 
   constructor(private router: Router, private route: ActivatedRoute,
@@ -715,7 +716,9 @@ export class ImportComponent implements OnInit {
     const config = {
       animated: false
     };
-
+    this.dataCheckDemoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+      'https://docs.google.com/presentation/d/e/2PACX-1vQmqK3qgUchHmZ5YQ8M-ktJ0UccIDeBeuqAqjIAbZ2HIXfmZ5OdqFRb7A' +
+      'M1YJI6N1vmimBAbOVa7QMe/embed?start=false&loop=false&delayms=3000');
     this.modalRef = this.modalService.show(template, config);
   }
 
