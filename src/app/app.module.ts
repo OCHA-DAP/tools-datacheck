@@ -8,28 +8,15 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { DatacheckComponent } from './datacheck/datacheck.component';
 import { AppRoutingModule } from './app-routing.module';
-import { Http, HttpModule, RequestOptions, XHRBackend } from '@angular/http';
 import { ImportComponent } from './datacheck/import/import.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from './common/common.module';
-import { AnalyticsService } from './common/analytics.service';
 import { SimpleModule } from 'hxl-preview-ng-lib';
-import { HttpService } from './shared/http.service';
 import { HotTableModule } from '@handsontable/angular';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ModalModule } from 'ngx-bootstrap';
-
-export const HTTP_SERVICE_PROVIDERS: any = {
-  provide: Http,
-  useFactory: httpFactory,
-  deps: [XHRBackend, RequestOptions]
-};
-
-export function httpFactory(backend: XHRBackend, options: RequestOptions) {
-  return new HttpService(backend, options);
-}
-
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -43,14 +30,13 @@ export function httpFactory(backend: XHRBackend, options: RequestOptions) {
     SimpleModule,
     CommonModule,
     BrowserModule,
-    HttpModule,
+    HttpClientModule,
     AppRoutingModule,
     FormsModule,
     HotTableModule.forRoot(),
     TooltipModule.forRoot()
   ],
   providers: [
-    HTTP_SERVICE_PROVIDERS,
     HxlproxyService,
     ConfigService,
     RecipeService
