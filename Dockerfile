@@ -8,7 +8,7 @@ RUN npm install -g @angular/cli && \
     npm install && \
     ng build --prod -bh /wizard/datacheck/
 
-FROM alpine:3.7
+FROM unocha/nginx:1.14
 
 COPY ./docker/default.conf /etc/nginx/conf.d/
 COPY --from=builder /src/dist /var/www
