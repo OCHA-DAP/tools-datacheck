@@ -5,7 +5,7 @@ WORKDIR /src
 COPY . .
 
 RUN npm install -g @angular/cli && \
-    npm install && \
+    yarn install && \
     ng build --prod -bh /wizard/datacheck/
 
 FROM unocha/nginx:1.14
