@@ -2,7 +2,7 @@ import { RecipeService, RuleType, RULE_TYPE_TAG } from './../services/recipe.ser
 import { COUNTRIES } from './../helpers/constants';
 import { ConfigService } from './../config.service';
 import { HxlproxyService } from './../services/hxlproxy.service';
-import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import {
   Component,
   OnInit,
@@ -11,12 +11,12 @@ import {
   TemplateRef
 } from '@angular/core';
 import { AnalyticsService } from '../../common/analytics.service';
-import { HttpService } from '../../shared/http.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import * as Handsontable from 'handsontable';
 import { HotTableRegisterer } from '@handsontable/angular';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap';
 
 
@@ -46,14 +46,6 @@ export class ImportComponent implements OnInit {
   errorList: any[];
 
   sampleData = [
-    // {
-    //   'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
-    //   'name': 'Alex\'s dataset',
-    //   'description': 'Lorem ipsum ... ',
-    //   'url': 'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx',
-    //   'org': 'IFRC',
-    //   'recipe': null
-    // },
     {
       'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
       'name': 'Sample data with name, p-code, and data type errors',
@@ -64,7 +56,6 @@ export class ImportComponent implements OnInit {
     }
   ];
 
-  httpService: HttpService;
   embedUrl: string = null;
   errorsXY = {};
   numberOfColumns: number;
@@ -102,15 +93,13 @@ export class ImportComponent implements OnInit {
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
-              http: Http, private sanitizer: DomSanitizer,
+              httpClient: HttpClient, private sanitizer: DomSanitizer,
               private hotRegisterer: HotTableRegisterer,
               private hxlProxyService: HxlproxyService,
               private configService: ConfigService,
               private recipeService: RecipeService,
               private elRef: ElementRef,
               private modalService: BsModalService) {
-
-    this.httpService = <HttpService> http;
 
     const BASE_URL = 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod';
     this.countries = COUNTRIES.map( c => {
@@ -176,7 +165,6 @@ export class ImportComponent implements OnInit {
   ngOnInit() {
     this.changeSampleUrl(this.sampleData[0].url, this.sampleData[0].recipe, true);
     this.route.paramMap.subscribe((params: ParamMap) => {
-      this.httpService.turnOnModal();
       const urlParam = params.get('url');
       if (urlParam) {
         this._selectedUrl = urlParam;
@@ -415,7 +403,7 @@ export class ImportComponent implements OnInit {
       /**
        * If there's no rule selected we just simulate returning a report with no errors
        */
-      validationObs = Observable.of(null);
+      validationObs = of(null);
     }
     validationObs.subscribe(report => {
       let errNum = 0;
@@ -474,13 +462,16 @@ export class ImportComponent implements OnInit {
   private fetchRecipeTemplate(recipeUrl: string): Observable<any[]> {
     let recipeObs: Observable<any[]> = null;
     if (this.lastRecipeUrl === recipeUrl && this.recipeTemplate) {
-      recipeObs = Observable.of(this.recipeTemplate);
+      recipeObs = of(this.recipeTemplate);
     } else {
-      recipeObs = this.recipeService.fetchRecipeTemplate(recipeUrl).map(recipe => {
-        this.recipeTemplate = recipe;
-        this.ruleTypesMap = this.recipeService.extractListOfTypes(recipe);
-        return recipe;
-      });
+      recipeObs = this.recipeService.fetchRecipeTemplate(recipeUrl)
+        .pipe(
+          map(recipe => {
+            this.recipeTemplate = recipe;
+            this.ruleTypesMap = this.recipeService.extractListOfTypes(recipe);
+            return recipe;
+          })
+        );
     }
 
     return recipeObs;

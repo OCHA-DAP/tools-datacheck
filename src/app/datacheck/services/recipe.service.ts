@@ -1,17 +1,18 @@
+import { throwError as observableThrowError,  Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { HxlproxyService, PostParam } from './hxlproxy.service';
-import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 
 export const RULE_TYPE_TAG = '#rule_type';
 export const RULE_TYPE_DESCRIPTION_TAG = '#rule_type_description';
 @Injectable()
 export class RecipeService {
 
-  constructor(private http: Http, private hxlProxyService: HxlproxyService) { }
+  constructor(private httpClient: HttpClient, private hxlProxyService: HxlproxyService) { }
 
   public fetchRecipeTemplate(url): Observable<any[]> {
-    return this.http.get(url).map( response => response.json()).catch(err => this.handleError(err));
+    return this.httpClient.get(url).pipe(catchError(err => this.handleError(err)));
   }
 
   public extractListOfTypes(recipe: any[]): Map<string, RuleType> {
@@ -67,24 +68,17 @@ export class RecipeService {
     return validationResult;
   }
 
-  private handleError (error: Response | any, errorHandler?: () => Observable<any>) {
+  private handleError (error: any, errorHandler?: () => Observable<any>) {
     let errMsg: string;
-    if (error instanceof Response) {
-      try {
-        const body = error.json() || '';
-        const err = body.error || JSON.stringify(body);
-        errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-      } catch (e) {
-        errMsg = e.toString();
-      }
+    if (error.error && error.status != null) {
+      errMsg = `${error.status} - ${error.statusText || ''} ${error.error || error}`;
     } else {
       errMsg = error.message ? error.message : error.toString();
     }
     console.error('ERR! ' + errMsg);
-    const retValue = errorHandler ? errorHandler() : Observable.throw(errMsg);
+    const retValue = errorHandler ? errorHandler() : observableThrowError(errMsg);
     return retValue;
   }
-
 }
 
 export class RuleType {

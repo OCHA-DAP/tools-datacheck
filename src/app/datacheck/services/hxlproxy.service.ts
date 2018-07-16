@@ -1,7 +1,8 @@
+import { throwError as observableThrowError,  Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from './../../../environments/environment';
-import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
-import { Http, Response, RequestOptions, Headers, URLSearchParams } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 
 export interface PostParam {
   key: string;
@@ -11,13 +12,13 @@ export interface PostParam {
 @Injectable()
 export class HxlproxyService {
 
-  constructor(private http: Http) { }
+  constructor(private httpClient: HttpClient) { }
 
   public makeValidationCall(params: { key: string, value: string }[],
         postParams: PostParam[]): Observable<any> {
 
-    const mapFunction = (response: Response) => {
-      const json = response.json();
+    const mapFunction = (response: any) => {
+      const json = response;
       let locations = [];
       json.issues = json.issues.sort((a, b) => a.description.substring(a.description.length - 2, a.description.length - 1) >
         b.description.substring(b.description.length - 2, b.description.length - 1));
@@ -63,7 +64,7 @@ export class HxlproxyService {
    */
   private makeCallToHxlProxy<T>(serverUrl: string, params: { key: string, value: string }[],
     postParams: PostParam[],
-    mapFunction: (response: Response) => T,
+    mapFunction: (response: any) => T,
     errorHandler?: () => Observable<T>): Observable<T> {
 
     let url = serverUrl;
@@ -72,7 +73,7 @@ export class HxlproxyService {
         url += '&' + params[i].key + '=' + encodeURIComponent(params[i].value);
       }
     }
-    let response: Observable<Response> = null;
+    let response: Observable<any> = null;
     if (postParams) {
       const formData: any = new FormData();
       // const postString = postParams.reduce(
@@ -87,29 +88,22 @@ export class HxlproxyService {
 
       // const headers = new Headers({ 'Content-Type': 'multipart/form-data' });
       // const options = new RequestOptions({ headers: headers });
-      response = this.http.post(url, formData);
+      response = this.httpClient.post(url, formData);
     } else {
-      response = this.http.get(url);
+      response = this.httpClient.get(url);
     }
-    return response.map(mapFunction.bind(this)).catch(err => this.handleError(err, errorHandler));
+    return response.pipe(map(mapFunction.bind(this)), catchError(err => this.handleError(err, errorHandler)));
   }
 
-  private handleError (error: Response | any, errorHandler?: () => Observable<any>) {
+  private handleError (error: any, errorHandler?: () => Observable<any>) {
     let errMsg: string;
-    if (error instanceof Response) {
-      try {
-        const body = error.json() || '';
-        const err = body.error || JSON.stringify(body);
-        errMsg = body; // `${error.status} - ${error.statusText || ''} ${err}`;
-      } catch (e) {
-        errMsg = e.toString();
-      }
+    if (error.error) {
+      errMsg = error.error;
     } else {
       errMsg = error.message ? error.message : error.toString();
     }
     console.error('ERR! ' + errMsg);
-    const retValue = errorHandler ? errorHandler() : Observable.throw(errMsg);
+    const retValue = errorHandler ? errorHandler() : observableThrowError(errMsg);
     return retValue;
   }
-
 }
