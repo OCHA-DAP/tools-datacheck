@@ -76,8 +76,7 @@ export class ImportComponent implements OnInit {
   showLoadingOverlay = false;
   loadingOverlayText = '';
 
-  customValidation = false;
-  customValidationList: Array<any> = null;
+  private savedCustomValidationList: Array<CustomValidationItem> = [new CustomValidationItem(null, null)];
 
   @ViewChild('hotTable')
   private hotTableEl: ElementRef;
@@ -688,26 +687,24 @@ export class ImportComponent implements OnInit {
 
   onTriggerCustomValidation() {
     if (this.customValidation) {
-      this.customValidationList = [];
-      this.onAddNewCustomValidation();
+      this.customValidationList = this.savedCustomValidationList;
+      this.rulesRecheck();
     } else {
+      this.savedCustomValidationList = this.customValidationList;
       this.customValidationList = [];
       this.rulesRecheck();
     }
   }
 
   onAddNewCustomValidation() {
-    this.customValidationList.push({
-      values: null,
-      column: null
-    });
+    this.customValidationList.push(new CustomValidationItem(null, null));
   }
 
   onRemoveCustomValidation(idx) {
     this.customValidationList.splice(idx, 1);
   }
 
-  onCustomValidationTagChange(item, event) {
+  onCustomValidationTagChange(item: CustomValidationItem, event) {
     item.tag = event.target.value;
     this.rulesRecheck();
   }
