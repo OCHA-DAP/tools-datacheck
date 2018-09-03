@@ -382,7 +382,7 @@ export class ImportComponent implements OnInit {
           const values = val.values.replace(/,/g, '|');
           const index = idx + 1;
           selectedRules.push({
-            '#valid_tag': val.tag,
+            '#valid_tag': val.tag + '!',
             '#valid_severity': 'error',
             '#valid_value+list': values,
             // "#valid_value+target_tag": val.tag,
