@@ -410,8 +410,23 @@ export class ImportComponent implements OnInit {
       if (report) {
         errNum = report.stats.total;
         this.data = report.dataset;
-        this.dataTitle = this.data[0].slice(0);
-        this.dataHXLTags = this.data[1].slice(0);
+
+        const dataTitleRow = this.data[0].slice(0);
+        const dataHxlRow = this.data[1].slice(0);
+
+        const dataTitleTmp = [];
+        const dataHxlTagsTmp = [];
+
+        for (let i = 0; i < this.data[0].length; i++) {
+          if (dataHxlRow[i].startsWith("#")) {
+            dataTitleTmp.push(dataTitleRow[i]);
+            dataHxlTagsTmp.push(dataHxlRow[i]);
+          }
+        }
+
+        this.dataTitle = dataTitleTmp;
+        this.dataHXLTags = dataHxlTagsTmp;
+
         this.numberOfColumns = this.data[0].length;
 
         this.errorReport = report;
