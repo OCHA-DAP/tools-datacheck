@@ -1,30 +1,23 @@
-FROM alpine:3.7 AS builder
+FROM unocha/nodejs-builder:8.11.3 AS builder
 
-ENV NPM_CONFIG_PROGRESS=false \
-    NPM_CONFIG_SPIN=false
-
-WORKDIR /srv/wizard
+WORKDIR /src
 
 COPY . .
 
-RUN apk add --update-cache \
-        nodejs \
-        nodejs-npm \
-        git \
-        curl \
-        nano && \
+RUN npm install npm@latest -g && \
     npm install -g @angular/cli && \
     npm install && \
-    ng build --prod -bh /wizard/datacheck/
+    ng build --prod --base-href /wizard/datacheck/
 
-FROM alpine:3.7
-
-RUN apk add --update nginx && \
-    mkdir -p /run/nginx
+FROM unocha/nginx:1.14
 
 COPY ./docker/default.conf /etc/nginx/conf.d/
-COPY --from=builder /srv/wizard/dist /var/www
+COPY --from=builder /src/dist /var/www
 
-EXPOSE 80
+VOLUME /var/log/nginx
 
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+# Volumes
+# - Conf: /etc/nginx/conf.d (default.conf)
+# - Cache: /var/cache/nginx
+# - Logs: /var/log/nginx
+# - Data: /var/www

@@ -1,44 +1,60 @@
-import { RecipeService, RuleType, RULE_TYPE_TAG } from './../services/recipe.service';
+import { RecipeService, RULE_TYPE_TAG, RuleType } from './../services/recipe.service';
 import { COUNTRIES } from './../helpers/constants';
 import { ConfigService } from './../config.service';
 import { HxlproxyService } from './../services/hxlproxy.service';
-import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  ElementRef,
-  TemplateRef
-} from '@angular/core';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { AnalyticsService } from '../../common/analytics.service';
-import { HttpService } from '../../shared/http.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import * as Handsontable from 'handsontable';
 import { HotTableRegisterer } from '@handsontable/angular';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap';
-
+import { CustomValidationItem } from './custom-validation-item';
 
 const DEFAULT_RECIPE = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
+
+class ImportComponentPersistent {
+  dataSource: string;
+  _selectedUrl: string;
+  _selectedRecipeUrl: string;
+  customValidation: boolean;
+  customValidationList: Array<CustomValidationItem>;
+  ruleTypesMap: Map<string, RuleType>;
+  _ruleTypeSelection: any;
+
+  constructor() {
+    this.dataSource = 'sample';
+    this._selectedUrl = '';
+    this._selectedRecipeUrl = null;
+    this.customValidation = false;
+    this.customValidationList = null;
+    this.ruleTypesMap = null;
+  }
+
+  toJSON() {
+    let copy: any = Object.assign({}, this);
+    copy._ruleTypeSelection = {};
+    this.ruleTypesMap.forEach((value, key) => {
+      copy._ruleTypeSelection[key] = value.enabled;
+    });
+    return copy;
+  }
+}
 
 @Component({
   selector: 'app-import',
   templateUrl: './import.component.html',
   styleUrls: ['./import.component.less']
 })
-export class ImportComponent implements OnInit {
+export class ImportComponent extends ImportComponentPersistent implements OnInit  {
 
-  readonly stepName = 'Import Data';
-  dataSource = 'sample';
   hxlCheckError: any = null;
-  _selectedUrl = '';
-  _selectedRecipeUrl: string;
-
   selectedFile: File = null;
 
   recipeTemplate: any[] = [];
-  ruleTypesMap: Map<string, RuleType>;
 
   tableSettings: any;
   tableId = 'table1';
@@ -46,14 +62,6 @@ export class ImportComponent implements OnInit {
   errorList: any[];
 
   sampleData = [
-    // {
-    //   'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
-    //   'name': 'Alex\'s dataset',
-    //   'description': 'Lorem ipsum ... ',
-    //   'url': 'https://github.com/alexandru-m-g/datavalidation-temp/raw/master/Dummy%20data.xlsx',
-    //   'org': 'IFRC',
-    //   'recipe': null
-    // },
     {
       'id': 'c7fb99a5-43ec-4b3f-b8db-935640c75aeb',
       'name': 'Sample data with name, p-code, and data type errors',
@@ -64,7 +72,6 @@ export class ImportComponent implements OnInit {
     }
   ];
 
-  httpService: HttpService;
   embedUrl: string = null;
   errorsXY = {};
   numberOfColumns: number;
@@ -81,39 +88,39 @@ export class ImportComponent implements OnInit {
   countries = [];
   urlToIso3Map = {};
   showRecipeDropdown = true;
-
   showLoadingOverlay = false;
   loadingOverlayText = '';
 
-  customValidation = false;
-  customValidationList: Array<any> = null;
+  private savedCustomValidationList: Array<CustomValidationItem> = [new CustomValidationItem(null, null)];
 
   @ViewChild('hotTable')
   private hotTableEl: ElementRef;
 
+  @ViewChild('shareTextArea')
+  private shareTextArea: ElementRef;
+
   private lastRecipeUrl: string = null;
   public dataTitle: string[];
   public dataHXLTags: string[];
-  public customValidationChoices: string[];
-  private showLoadingDots = false;
+  public showLoadingDots = false;
   modalRef: BsModalRef;
   dataCheckDemoUrl: SafeResourceUrl = null;
+  public shareURL: string;
 
 
   constructor(private router: Router, private route: ActivatedRoute,
               private analyticsService: AnalyticsService,
-              http: Http, private sanitizer: DomSanitizer,
+              httpClient: HttpClient, private sanitizer: DomSanitizer,
               private hotRegisterer: HotTableRegisterer,
               private hxlProxyService: HxlproxyService,
               private configService: ConfigService,
               private recipeService: RecipeService,
               private elRef: ElementRef,
               private modalService: BsModalService) {
-
-    this.httpService = <HttpService> http;
+    super();
 
     const BASE_URL = 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod';
-    this.countries = COUNTRIES.map( c => {
+    this.countries = COUNTRIES.map(c => {
       return {
         name: c.name,
         url: `${BASE_URL}/pcodes/validation-schema-pcodes-${c.iso3}.json`,
@@ -176,7 +183,6 @@ export class ImportComponent implements OnInit {
   ngOnInit() {
     this.changeSampleUrl(this.sampleData[0].url, this.sampleData[0].recipe, true);
     this.route.paramMap.subscribe((params: ParamMap) => {
-      this.httpService.turnOnModal();
       const urlParam = params.get('url');
       if (urlParam) {
         this._selectedUrl = urlParam;
@@ -186,12 +192,20 @@ export class ImportComponent implements OnInit {
       if (recipeUrlParam) {
         this._selectedRecipeUrl = recipeUrlParam;
       }
-      this.reloadDataAndValidate();
 
       const showRecipeDropdown = params.get('recipeDropdown');
       if (showRecipeDropdown === 'false') {
         this.showRecipeDropdown = false;
       }
+
+      const config = params.get('config');
+      if (config) {
+        let configuration: ImportComponentPersistent = JSON.parse(config);
+        Object.assign(this, configuration);
+        this.ruleTypesMap = null;
+      }
+
+      this.reloadDataAndValidate();
     });
 
     const headerRenderer = (instance, td, row, col, prop, value, cellProperties) => {
@@ -311,7 +325,7 @@ export class ImportComponent implements OnInit {
       dragToScroll: false,
       afterSelection: afterSelection,
       beforeKeyDown: beforeKeyDown,
-      cells: function(row, col, prop) {
+      cells: function (row, col, prop) {
         const cellProperties: any = {};
 
         if (row < 2) {
@@ -379,12 +393,13 @@ export class ImportComponent implements OnInit {
     const iso3 = this.urlToIso3Map[this.selectedRecipeUrl];
     const analyticsInfo = {
       datasourceType: this.dataSource,
-      datasourceUrl: this.dataSource === 'upload' ?  this.selectedFile.name : this.selectedUrl,
+      datasourceUrl: this.dataSource === 'upload' ? this.selectedFile.name : this.selectedUrl,
       validations: this.getSelectedRuleTypes(),
       locations: iso3 ? [iso3] : []
     };
 
     this.showLoadingOverlay = true;
+    this.generateShareURL();
     this.resetErrors();
     const selectedRules = this.selectedRules.slice(0);
     if (this.customValidationList) {
@@ -394,7 +409,7 @@ export class ImportComponent implements OnInit {
           const values = val.values.replace(/,/g, '|');
           const index = idx + 1;
           selectedRules.push({
-            '#valid_tag': val.tag,
+            '#valid_tag': val.tag + '!',
             '#valid_severity': 'error',
             '#valid_value+list': values,
             // "#valid_value+target_tag": val.tag,
@@ -415,15 +430,30 @@ export class ImportComponent implements OnInit {
       /**
        * If there's no rule selected we just simulate returning a report with no errors
        */
-      validationObs = Observable.of(null);
+      validationObs = of(null);
     }
     validationObs.subscribe(report => {
       let errNum = 0;
       if (report) {
         errNum = report.stats.total;
         this.data = report.dataset;
-        this.dataTitle = this.data[0].slice(0);
-        this.dataHXLTags = this.data[1].slice(0);
+
+        const dataTitleRow = this.data[0].slice(0);
+        const dataHxlRow = this.data[1].slice(0);
+
+        const dataTitleTmp = [];
+        const dataHxlTagsTmp = [];
+
+        for (let i = 0; i < this.data[0].length; i++) {
+          if (dataHxlRow[i].startsWith("#")) {
+            dataTitleTmp.push(dataTitleRow[i]);
+            dataHxlTagsTmp.push(dataHxlRow[i]);
+          }
+        }
+
+        this.dataTitle = dataTitleTmp;
+        this.dataHXLTags = dataHxlTagsTmp;
+
         this.numberOfColumns = this.data[0].length;
 
         this.errorReport = report;
@@ -449,7 +479,7 @@ export class ImportComponent implements OnInit {
       this.showLoadingDots = false;
       if (error.source_status_code === 404) {
         this.hxlCheckError = 'The provided data source couldn\'t be found or read, please verify it is correct'
-              + baseErrorMsg;
+          + baseErrorMsg;
       } else if (error.status === 403) {
         this.hxlCheckError = error.message + baseErrorMsg;
       } else if (error.status === 500 && error.error === 'UnicodeDecodeError') {
@@ -474,13 +504,24 @@ export class ImportComponent implements OnInit {
   private fetchRecipeTemplate(recipeUrl: string): Observable<any[]> {
     let recipeObs: Observable<any[]> = null;
     if (this.lastRecipeUrl === recipeUrl && this.recipeTemplate) {
-      recipeObs = Observable.of(this.recipeTemplate);
+      recipeObs = of(this.recipeTemplate);
     } else {
-      recipeObs = this.recipeService.fetchRecipeTemplate(recipeUrl).map(recipe => {
-        this.recipeTemplate = recipe;
-        this.ruleTypesMap = this.recipeService.extractListOfTypes(recipe);
-        return recipe;
-      });
+      recipeObs = this.recipeService.fetchRecipeTemplate(recipeUrl)
+        .pipe(
+          map(recipe => {
+            this.recipeTemplate = recipe;
+            this.ruleTypesMap = this.recipeService.extractListOfTypes(recipe);
+            if (this._ruleTypeSelection) {
+              Object.keys(this._ruleTypeSelection).forEach(key => {
+                const ruleType = this.ruleTypesMap.get(key);
+                if (ruleType) {
+                  ruleType.enabled = this._ruleTypeSelection[key];
+                }
+              })
+            }
+            return recipe;
+          })
+        );
     }
 
     return recipeObs;
@@ -488,7 +529,7 @@ export class ImportComponent implements OnInit {
 
   getSelectedRuleTypes(): string[] {
     const selectedRuleTypes: string[] = [];
-    this.ruleTypesMap.forEach( ruleType => {
+    this.ruleTypesMap.forEach(ruleType => {
       if (ruleType.enabled) {
         selectedRuleTypes.push(ruleType.name);
       }
@@ -532,6 +573,7 @@ export class ImportComponent implements OnInit {
     this.selectedUrl = newUrl;
     this.dataSource = 'url';
   }
+
   changeDatasource($event) {
     this.dataSource = $event.target.value;
     if (this.dataSource === 'sample') {
@@ -599,7 +641,7 @@ export class ImportComponent implements OnInit {
 
   get hotInstance(): Handsontable {
     // if (!this._hotInstance) {
-      this._hotInstance = this.hotRegisterer.getInstance(this.tableId);
+    this._hotInstance = this.hotRegisterer.getInstance(this.tableId);
     // }
     return this._hotInstance;
   }
@@ -682,26 +724,24 @@ export class ImportComponent implements OnInit {
 
   onTriggerCustomValidation() {
     if (this.customValidation) {
-      this.customValidationList = [];
-      this.onAddNewCustomValidation();
+      this.customValidationList = this.savedCustomValidationList;
+      this.rulesRecheck();
     } else {
+      this.savedCustomValidationList = this.customValidationList;
       this.customValidationList = [];
       this.rulesRecheck();
     }
   }
 
   onAddNewCustomValidation() {
-    this.customValidationList.push({
-      values: null,
-      column: null
-    });
+    this.customValidationList.push(new CustomValidationItem(null, null));
   }
 
   onRemoveCustomValidation(idx) {
     this.customValidationList.splice(idx, 1);
   }
 
-  onCustomValidationTagChange(item, event) {
+  onCustomValidationTagChange(item: CustomValidationItem, event) {
     item.tag = event.target.value;
     this.rulesRecheck();
   }
@@ -722,4 +762,21 @@ export class ImportComponent implements OnInit {
     this.modalRef = this.modalService.show(template, config);
   }
 
+  private generateShareURL() {
+    const icp: ImportComponentPersistent = new ImportComponentPersistent();
+    Object.keys(icp).map(key => {
+      icp[key] = this[key];
+    });
+    const icpStr = JSON.stringify(icp);
+    const icpEncStr = encodeURIComponent(icpStr)
+      .replace(/\(/g, "%28")
+      .replace(/\)/g, "%29");
+    const shareURL = window.location + ";config=" + icpEncStr;
+    this.shareURL = shareURL;
+  }
+
+  public setSelectionRange() {
+    this.shareTextArea.nativeElement.setSelectionRange(0, 0);
+    this.shareTextArea.nativeElement.setSelectionRange(0, this.shareTextArea.nativeElement.value.length);
+  }
 }
