@@ -13,15 +13,25 @@
   @stepHeaderDescriptionFontSize: 16px;
   @stepHeaderLineHeight: 1.42;
   .step-header {
-    background-color: @whiteColor;
-    //position: absolute;
-    //width: 100%;
+    background-color: @extraLightGrayColor;
+    .step-header-content {
+      border-bottom: 1px solid @lightGrayColor;
+      margin-bottom: 40px;
+      position: relative;
+      height: 240px;
 
-
-    .description {
-      .sourceSansProFont(400, @stepHeaderDescriptionFontSize);
-      margin-bottom: @stepHeaderMarginBottom;
-      line-height: @stepHeaderLineHeight;
+      .description {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        transform: translateY(-50%);
+        line-height: @stepHeaderLineHeight;
+        text-align: center;
+        .gothamBookFont(24px);
+        strong {
+          .gothamMediumFont(24px);
+        }
+      }
     }
   }
 
