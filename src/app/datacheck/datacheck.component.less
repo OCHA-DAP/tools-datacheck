@@ -22,20 +22,7 @@
 .wizard-header-container {
   background-color: @whiteColor;
 }
-.wizard-header {
-  //margin: 0 -15px;
-  //padding: 0 15px;
-  background-color: @whiteColor;
-  margin: 0 @containerMarginSize;
 
-  border-bottom: @wizardHeaderBorderSize solid @lightGrayColor;
-  h1 {
-    .gothamMediumFont(@wizardH1Size);
-    line-height: @wizardH1LineHeight;
-    color: @darkGrayColor;
-    margin: @wizardTBPadding 0;
-  }
-}
 @stepsContainerHeight: @wizardH1LineHeight*@wizardH1Size + 2*@wizardTBPadding;
 .steps-container {
   height: @stepsContainerHeight;
@@ -147,3 +134,35 @@ ol.steps {
     }
   }
 }
+
+.hero-section {
+  height: 400px;
+  background: @whiteColor;
+  position: relative;
+  .hero-content {
+    position: absolute;
+    top: 50%;
+    left: 150px;
+    width: 600px;
+    transform: translateY(-50%);
+    .gothamMediumFont(24px);
+    color: @greenColor;
+    h1 {
+      .gothamMediumFont(40px);
+      margin-bottom: 40px;
+      color: @greenColor;
+    }
+    .hero-description {
+      line-height: 1.25em;
+      white-space: pre-line;
+    }
+  }
+  .hero-image {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 300px;
+    right: 150px;
+  }
+}
+
