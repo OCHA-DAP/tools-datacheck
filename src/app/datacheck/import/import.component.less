@@ -444,3 +444,36 @@
 .share-text {
   height: 3*20px + 15px;
 }
+
+
+.hero-section {
+  height: 400px;
+  background: @whiteColor;
+  position: relative;
+  .hero-content {
+    position: absolute;
+    top: 50%;
+    left: 150px;
+    width: 600px;
+    transform: translateY(-50%);
+    .gothamMediumFont(24px);
+    color: @greenColor;
+    h1 {
+      .gothamMediumFont(40px);
+      margin-bottom: 40px;
+      color: @greenColor;
+    }
+    .hero-description {
+      line-height: 1.25em;
+      white-space: pre-line;
+    }
+  }
+  .hero-image {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 300px;
+    right: 150px;
+  }
+}
+
