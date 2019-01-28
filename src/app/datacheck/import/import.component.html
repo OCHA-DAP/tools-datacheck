@@ -1,5 +1,16 @@
+<div *ngIf="!embedded" class="paddingDoubleRowHack wizard-header-container">
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1>Data Check</h1>
+      <div class="hero-description">Use data with HXL hashtags to automatically detect errors
+        and validate against common vocabularies.
+      </div>
+    </div>
+    <img src="./assets/data-check.svg" class="hero-image">
+  </div>
+</div>
 <div id="step1" class="step">
-  <div class="paddingDoubleRowHack step-header">
+  <div *ngIf="!embedded" class="paddingDoubleRowHack step-header">
     <div class="paddingDoubleLRHack">
       <div class="row step-header-content">
           <div class="description">
@@ -11,7 +22,7 @@
       </div>
     </div>
   </div>
-  <div class="step-content">
+  <div *ngIf="!embedded" class="step-content">
     <div class="row">
       <div class="col-xs-3">
         <div class="radio-selection">

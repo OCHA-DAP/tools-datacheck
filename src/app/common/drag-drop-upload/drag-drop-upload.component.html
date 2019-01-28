@@ -4,6 +4,9 @@
   <div class="drag-drop-center-container">
     <div class="drag-drop-title"><span class="normal-message"> Drop file or <a href (click)="onBrowse($event)">Browse</a></span> <span class="drop-message">Incoming file ...</span></div>
     <div class="drag-drop-subtitle">(.csv, .xls, or .xlsx only)</div>
-    <div *ngIf="filename" class="drag-drop-body">You have selected: <span class="drag-drop-filename">{{filename}}</span></div>
+    <div *ngIf="filename" class="drag-drop-body">
+      <div class="drag-drop-filename">You have selected: </div>
+      <div class="drag-drop-filename drag-drop-filename-truncate" title="{{filename}}}">{{filename}}</div>
+    </div>
   </div>
 </div>

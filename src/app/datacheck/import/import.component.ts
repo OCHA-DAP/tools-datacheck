@@ -24,6 +24,7 @@ class ImportComponentPersistent {
   customValidationList: Array<CustomValidationItem>;
   ruleTypesMap: Map<string, RuleType>;
   _ruleTypeSelection: any;
+  embedded: boolean;
 
   constructor() {
     this.dataSource = 'sample';
@@ -32,6 +33,7 @@ class ImportComponentPersistent {
     this.customValidation = false;
     this.customValidationList = null;
     this.ruleTypesMap = null;
+    this.embedded = false;
   }
 
   toJSON() {
