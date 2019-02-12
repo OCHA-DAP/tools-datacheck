@@ -11,7 +11,6 @@ export const COUNTRIES = [
   { name: "Guinea", iso3: "gin" },
   { name: "Honduras", iso3: "hnd" },
   { name: "Iraq", iso3: "irq" },
-  { name: "Klanndestan", iso3: "kdn" },
   { name: "Kyrgyzstan", iso3: "kgz" },
   { name: "Lebanon", iso3: "lbn" },
   { name: "Mali", iso3: "mli" },
