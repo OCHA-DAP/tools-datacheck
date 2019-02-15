@@ -189,7 +189,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
       const urlParam = params.get('url');
       if (urlParam) {
         this._selectedUrl = urlParam;
-        this.dataSource = 'sample';
+        this.dataSource = 'url';
       }
       const recipeUrlParam = params.get('recipeUrl');
       if (recipeUrlParam) {
