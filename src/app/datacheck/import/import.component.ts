@@ -425,10 +425,12 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
     }
 
     let validationObs = null;
-    if (this.dataSource === 'upload' && this.selectedFile) {
-      validationObs = this.recipeService.validateData(null, this.selectedFile, JSON.stringify(selectedRules));
-    } else if (selectedRules && selectedRules.length > 0) {
-      validationObs = this.recipeService.validateData(this.selectedUrl, null, JSON.stringify(selectedRules));
+    if (selectedRules && selectedRules.length > 0) {
+      if (this.dataSource === 'upload' && this.selectedFile) {
+        validationObs = this.recipeService.validateData(null, this.selectedFile, JSON.stringify(selectedRules));
+      } else {
+        validationObs = this.recipeService.validateData(this.selectedUrl, null, JSON.stringify(selectedRules));
+      }
     } else {
       /**
        * If there's no rule selected we just simulate returning a report with no errors
