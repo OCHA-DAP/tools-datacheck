@@ -198,7 +198,9 @@
                         </div>
                         <div class="col-xs-8 section scrollable">
                           <div>
-                            <a *ngFor="let location of error.locations" class="cell-href" (click)="jumpTo(location.col, location.row)">{{ getColHeaderFromCol(location.col) + (location.row + 1)}}</a>
+                            <ng-container *ngFor="let location of error.locations">
+                              <a *ngIf="!location.fake" class="cell-href" (click)="jumpTo(location.col, location.row)">{{ getColHeaderFromCol(location.col) + (location.row + 1)}}</a>
+                            </ng-container>
                           </div>
                         </div>
                       </div>

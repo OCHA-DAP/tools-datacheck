@@ -13,6 +13,7 @@ import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap';
 import { CustomValidationItem } from './custom-validation-item';
+import { InapplicableRulesProcessor } from '../helpers/inapplicabale-rules';
 
 const DEFAULT_RECIPE = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
 
@@ -37,7 +38,7 @@ class ImportComponentPersistent {
   }
 
   toJSON() {
-    let copy: any = Object.assign({}, this);
+    const copy: any = Object.assign({}, this);
     copy._ruleTypeSelection = {};
     this.ruleTypesMap.forEach((value, key) => {
       copy._ruleTypeSelection[key] = value.enabled;
@@ -188,7 +189,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
       const urlParam = params.get('url');
       if (urlParam) {
         this._selectedUrl = urlParam;
-        this.dataSource = 'sample';
+        this.dataSource = 'url';
       }
       const recipeUrlParam = params.get('recipeUrl');
       if (recipeUrlParam) {
@@ -202,7 +203,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
 
       const config = params.get('config');
       if (config) {
-        let configuration: ImportComponentPersistent = JSON.parse(config);
+        const configuration: ImportComponentPersistent = JSON.parse(config);
         Object.assign(this, configuration);
         this.ruleTypesMap = null;
       }
@@ -345,11 +346,11 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
   private tableJumpTo(nextCol: number, nextRow: number) {
     if (nextRow !== undefined && nextCol !== undefined) {
       this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, true);
-      this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
+      this.hotInstance.scrollViewportTo(nextRow, nextCol, true, false);
     } else {
       if (nextCol !== undefined) {
         this.hotInstance.selectColumns(nextCol);
-        this.hotInstance.scrollViewportTo(1, nextCol, true, true);
+        this.hotInstance.scrollViewportTo(1, nextCol, true, false);
       }
     }
 
@@ -424,10 +425,12 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
     }
 
     let validationObs = null;
-    if (this.dataSource === 'upload' && this.selectedFile) {
-      validationObs = this.recipeService.validateData(null, this.selectedFile, JSON.stringify(selectedRules));
-    } else if (selectedRules && selectedRules.length > 0) {
-      validationObs = this.recipeService.validateData(this.selectedUrl, null, JSON.stringify(selectedRules));
+    if (selectedRules && selectedRules.length > 0) {
+      if (this.dataSource === 'upload' && this.selectedFile) {
+        validationObs = this.recipeService.validateData(null, this.selectedFile, JSON.stringify(selectedRules));
+      } else {
+        validationObs = this.recipeService.validateData(this.selectedUrl, null, JSON.stringify(selectedRules));
+      }
     } else {
       /**
        * If there's no rule selected we just simulate returning a report with no errors
@@ -436,8 +439,8 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
     }
     validationObs.subscribe(report => {
       let errNum = 0;
+
       if (report) {
-        errNum = report.stats.total;
         this.data = report.dataset;
 
         const dataTitleRow = this.data[0].slice(0);
@@ -447,7 +450,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
         const dataHxlTagsTmp = [];
 
         for (let i = 0; i < this.data[0].length; i++) {
-          if (dataHxlRow[i].startsWith("#")) {
+          if (dataHxlRow[i].startsWith('#')) {
             dataTitleTmp.push(dataTitleRow[i]);
             dataHxlTagsTmp.push(dataHxlRow[i]);
           }
@@ -458,7 +461,12 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
 
         this.numberOfColumns = this.data[0].length;
 
+        const inapplicableRulesProcessor = new InapplicableRulesProcessor(report, selectedRules, this.dataHXLTags);
+        report = inapplicableRulesProcessor.generateNewReport();
+
         this.errorReport = report;
+        errNum = this.errorReport.stats.total;
+
         report.flatErrors.forEach((val, index) => {
           let errorsX = this.errorsXY[val.col];
           if (errorsX === undefined) {
@@ -519,7 +527,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
                 if (ruleType) {
                   ruleType.enabled = this._ruleTypeSelection[key];
                 }
-              })
+              });
             }
             return recipe;
           })
@@ -546,7 +554,6 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
 
   protected rulesRecheck() {
     this.validateData();
-    //here
     this.selectedColumn = null;
     this.selectedRow = null;
   }
@@ -579,7 +586,9 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
   changeDatasource($event) {
     this.dataSource = $event.target.value;
     if (this.dataSource === 'sample') {
-      // "Sierra Leone" - https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/pcodes/validation-schema-pcodes-sle.json
+      // "Sierra Leone"
+      // - https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/pcodes/validation-schema-pcodes-sle.json
+      // tslint:disable-next-line:max-line-length
       this._selectedRecipeUrl = 'https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/pcodes/validation-schema-pcodes-sle.json';
     } else {
       // "No country" - https://raw.githubusercontent.com/OCHA-DAP/tools-datacheck-validation/prod/basic-validation-schema.json
@@ -771,9 +780,9 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
     });
     const icpStr = JSON.stringify(icp);
     const icpEncStr = encodeURIComponent(icpStr)
-      .replace(/\(/g, "%28")
-      .replace(/\)/g, "%29");
-    const shareURL = window.location + ";config=" + icpEncStr;
+      .replace(/\(/g, '%28')
+      .replace(/\)/g, '%29');
+    const shareURL = window.location + ';config=' + icpEncStr;
     this.shareURL = shareURL;
   }
 
