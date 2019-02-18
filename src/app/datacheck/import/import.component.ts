@@ -346,11 +346,11 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
   private tableJumpTo(nextCol: number, nextRow: number) {
     if (nextRow !== undefined && nextCol !== undefined) {
       this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, true);
-      this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
+      this.hotInstance.scrollViewportTo(nextRow, nextCol, true, false);
     } else {
       if (nextCol !== undefined) {
         this.hotInstance.selectColumns(nextCol);
-        this.hotInstance.scrollViewportTo(1, nextCol, true, true);
+        this.hotInstance.scrollViewportTo(1, nextCol, true, false);
       }
     }
 
