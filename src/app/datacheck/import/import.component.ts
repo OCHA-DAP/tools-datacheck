@@ -360,11 +360,11 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
   private tableJumpTo(nextCol: number, nextRow: number) {
     if (nextRow !== undefined && nextCol !== undefined) {
       this.hotInstance.selectCell(nextRow, nextCol, nextRow, nextCol, true, true);
-      this.hotInstance.scrollViewportTo(nextRow, nextCol, true, true);
+      this.hotInstance.scrollViewportTo(nextRow, nextCol, true, false);
     } else {
       if (nextCol !== undefined) {
         this.hotInstance.selectColumns(nextCol);
-        this.hotInstance.scrollViewportTo(1, nextCol, true, true);
+        this.hotInstance.scrollViewportTo(1, nextCol, true, false);
       }
     }
 
@@ -439,10 +439,12 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
     }
 
     let validationObs = null;
-    if (this.dataSource === 'upload' && this.selectedFile) {
-      validationObs = this.recipeService.validateData(null, this.selectedFile, JSON.stringify(selectedRules));
-    } else if (selectedRules && selectedRules.length > 0) {
-      validationObs = this.recipeService.validateData(this.selectedUrl, null, JSON.stringify(selectedRules));
+    if (selectedRules && selectedRules.length > 0) {
+      if (this.dataSource === 'upload' && this.selectedFile) {
+        validationObs = this.recipeService.validateData(null, this.selectedFile, JSON.stringify(selectedRules));
+      } else {
+        validationObs = this.recipeService.validateData(this.selectedUrl, null, JSON.stringify(selectedRules));
+      }
     } else {
       /**
        * If there's no rule selected we just simulate returning a report with no errors
