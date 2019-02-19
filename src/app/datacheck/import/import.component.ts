@@ -109,6 +109,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
   modalRef: BsModalRef;
   dataCheckDemoUrl: SafeResourceUrl = null;
   public shareURL: string;
+  private maxColumnWidth: number;
 
 
   constructor(private router: Router, private route: ActivatedRoute,
@@ -184,6 +185,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
   }
 
   ngOnInit() {
+    this.maxColumnWidth = window.innerWidth - 500 > 300 ? window.innerWidth - 500 : 300;
     this.changeSampleUrl(this.sampleData[0].url, this.sampleData[0].recipe, true);
     this.route.paramMap.subscribe((params: ParamMap) => {
       const urlParam = params.get('url');
@@ -327,6 +329,18 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
       // disableVisualSelection: ['area'],
       dragToScroll: false,
       afterSelection: afterSelection,
+      afterRenderer: (td, row, col, prop, value, cellProperties) => {
+        if (value && value.length > 45) {
+          td.setAttribute('title', value);
+          td.setAttribute('data-toogle', 'tooltip');
+        }
+      },
+      modifyColWidth: (width, col) => {
+        if (width > this.maxColumnWidth) {
+          return this.maxColumnWidth;
+        }
+      },
+      wordWrap: true,
       beforeKeyDown: beforeKeyDown,
       cells: function (row, col, prop) {
         const cellProperties: any = {};
