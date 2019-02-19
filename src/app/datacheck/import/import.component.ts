@@ -735,16 +735,22 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
     this.errorList = [];
   }
 
-  reviewErrors() {
-    this.selectedColumn = 0;
+  private updateColumnSelection(){
+    this.tableJumpTo(this.selectedColumn, this.selectedRow);
     this.updateErrorList();
     this.updateErrorPopup();
   }
 
+  reviewErrors() {
+    this.selectedColumn = 0;
+    this.selectedRow = undefined;
+    this.updateColumnSelection();
+  }
+
   incrementColumn(val: number) {
     this.selectedColumn += val;
-    this.updateErrorList();
-    this.updateErrorPopup();
+    this.selectedRow = undefined;
+    this.updateColumnSelection();
   }
 
   onTriggerCustomValidation() {
