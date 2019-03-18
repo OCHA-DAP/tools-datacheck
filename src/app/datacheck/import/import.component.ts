@@ -498,7 +498,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
       this.updateErrorList();
       this.showLoadingOverlay = false;
     }, (error) => {
-      const baseErrorMsg = '. If the problem persists, try again later or drop us a line at hdx.feedback@gmail.com';
+      const baseErrorMsg = '. If the problem persists, try again later or drop us a line at hdx@un.org';
       this.loadingOverlayText = 'Something went wrong' + baseErrorMsg;
       this.showLoadingDots = false;
       if (error.source_status_code === 404) {
