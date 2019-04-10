@@ -15,6 +15,7 @@ export const COUNTRIES = [
   { name: "Lebanon", iso3: "lbn" },
   { name: "Mali", iso3: "mli" },
   { name: "Mauritania", iso3: "mrt" },
+  { name: "Mozambique", iso3: "moz" },
   { name: "Niger", iso3: "ner" },
   { name: "Nigeria", iso3: "nga" },
   { name: "Pakistan", iso3: "pak" },
