@@ -25,8 +25,8 @@
     "bootstrap": "^3.3.7",
     "core-js": "^2.4.1",
     "handsontable": "^2.0.0",
-    "hxl-preview-ng-lib": "file:../hxl-bites/build/hxl-preview-ng-lib-3.0.0.tgz",
-    "ngx-bootstrap": "^3.0.1",
+    "hxl-preview-ng-lib": "https://github.com/OCHA-DAP/hdx-hxl-preview/raw/dev/build/hxl-preview-ng-lib-3.0.0.tgz",
+    "ngx-bootstrap": "^5.5.0",
     "rxjs": "^6.3.3",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
