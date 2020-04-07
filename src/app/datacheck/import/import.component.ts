@@ -11,9 +11,9 @@ import * as Handsontable from 'handsontable';
 import { HotTableRegisterer } from '@handsontable/angular';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap';
 import { CustomValidationItem } from './custom-validation-item';
 import { InapplicableRulesProcessor } from '../helpers/inapplicabale-rules';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 
 const DEFAULT_RECIPE = 'https://docs.google.com/spreadsheets/d/1NaASPAFoxVtKBiai9bbZqeenMfGrkLkmNiV0FoSoZms/edit#gid=0';
 

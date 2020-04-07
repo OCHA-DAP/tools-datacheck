@@ -15,8 +15,8 @@ import { HxlPreviewLibModule } from 'hxl-preview-ng-lib';
 import { HotTableModule } from '@handsontable/angular';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
-import { ModalModule } from 'ngx-bootstrap';
 import { HttpClientModule } from '@angular/common/http';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 @NgModule({
   declarations: [
