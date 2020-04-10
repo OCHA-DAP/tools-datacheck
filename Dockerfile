@@ -9,7 +9,7 @@ RUN npm install npm@latest -g && \
     npm install && \
     ng build --prod --base-href /wizard/datacheck/
 
-FROM unocha/nginx:1.14
+FROM unocha/nginx:1.16
 
 COPY ./docker/default.conf /etc/nginx/conf.d/
 COPY --from=builder /src/dist /var/www
