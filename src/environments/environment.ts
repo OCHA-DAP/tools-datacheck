@@ -5,8 +5,8 @@
 
 export const environment = {
   production: false,
-  hxlProxy: 'https://beta.proxy.hxlstandard.org/data.json',
-  hxlProxyValidate: 'https://beta.proxy.hxlstandard.org/actions/validate',
+  hxlProxy: 'https://tools.humdata.org/hxlproxy/data.json',
+  hxlProxyValidate: 'https://tools.humdata.org/hxlproxy/actions/validate',
   hxlCheck: 'http://www.mocky.io/v2/59e0f52f0f00003405effd4c', // succesful hxl check
   // hxlCheck: 'http://www.mocky.io/v2/59ec7fc03100009601d24e0e', // failing hxl check
   hxlPreview: 'https://tools.humdata.org/quickcharts/app',
