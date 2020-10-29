@@ -11,7 +11,7 @@ RUN npm install npm@latest -g && \
 
 FROM unocha/nginx:1.18
 
-COPY ./docker/default.conf /etc/nginx/conf.d/
+COPY ./docker/common.conf ./docker/default.conf /etc/nginx/conf.d/
 COPY --from=builder /src/dist /var/www
 
 VOLUME /var/log/nginx
