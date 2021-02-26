@@ -20,17 +20,18 @@
     "@angular/platform-browser": "11.2.3",
     "@angular/platform-browser-dynamic": "11.2.3",
     "@angular/router": "11.2.3",
-    "@handsontable/angular": "^6.0.1",
+    "@handsontable/angular": "^1.0.0-beta5",
     "bootstrap": "^3.3.7",
     "core-js": "^2.4.1",
     "handsontable": "^2.0.0",
-    "hxl-preview-ng-lib": "https://github.com/OCHA-DAP/hdx-hxl-preview/raw/dev/build/hxl-preview-ng-lib-3.0.2.tgz",
+    "hxl-preview-ng-lib": "https://github.com/OCHA-DAP/hdx-hxl-preview/raw/dev/build/hxl-preview-ng-lib-3.1.0.tgz",
     "ngx-bootstrap": "^5.6.1",
-    "rxjs": "^6.3.3",
+    "rxjs": "^6.6.6",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.3"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "~0.1102.2",
     "@angular/cli": "11.2.2",
     "@angular/compiler-cli": "11.2.3",
     "@angular/language-service": "11.2.3",
@@ -41,9 +42,9 @@
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
     "protractor": "~7.0.0",
-    "rxjs-tslint": "^0.1.5",
+    "rxjs-tslint": "^0.1.8",
     "ts-node": "~4.1.0",
     "tslint": "~6.1.0",
-    "@angular-devkit/build-angular": "~0.1102.2"
+    "typescript": "^4.1.5"
   }
 }
