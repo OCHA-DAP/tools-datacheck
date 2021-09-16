@@ -1,4 +1,4 @@
-FROM unocha/nodejs-builder:12 AS builder
+FROM public.ecr.aws/unocha/nodejs-builder:12-alpine AS builder
 
 WORKDIR /src
 
@@ -9,7 +9,7 @@ RUN npm install npm@latest -g && \
     npm install && \
     ng build --prod --base-href /wizard/datacheck/
 
-FROM unocha/nginx:1.20
+FROM public.ecr.aws/unocha/nginx:1.20
 
 COPY ./docker/common.conf ./docker/default.conf /etc/nginx/http.d/
 COPY --from=builder /src/dist /var/www
