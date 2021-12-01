@@ -64,4 +64,4 @@ jobs:
           push: true
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-          tags: public.ecr.aws/unocha/hdx-tools-datacheck-wizard:${{ steps.tag_info.outputs.IMAGE_TAG }}
+          tags: public.ecr.aws/unocha/hdx-tools-datacheck:${{ steps.tag_info.outputs.IMAGE_TAG }}
