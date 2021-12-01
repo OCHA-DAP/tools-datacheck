@@ -7,7 +7,7 @@ COPY . .
 RUN npm install npm@latest -g && \
     npm install -g @angular/cli && \
     npm install && \
-    ng build --prod --base-href /wizard/datacheck/
+    ng build --prod --base-href /tools/datacheck/
 
 FROM public.ecr.aws/unocha/nginx:1.20
 
