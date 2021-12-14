@@ -11,12 +11,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { ImportComponent } from './datacheck/import/import.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from './common/common.module';
-import { SimpleModule } from 'hxl-preview-ng-lib';
+import { HxlPreviewLibModule } from 'hxl-preview-ng-lib';
 import { HotTableModule } from '@handsontable/angular';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
-import { ModalModule } from 'ngx-bootstrap';
 import { HttpClientModule } from '@angular/common/http';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 @NgModule({
   declarations: [
@@ -27,7 +27,7 @@ import { HttpClientModule } from '@angular/common/http';
   imports: [
     ModalModule.forRoot(),
     BsDropdownModule.forRoot(),
-    SimpleModule,
+    HxlPreviewLibModule,
     CommonModule,
     BrowserModule,
     HttpClientModule,

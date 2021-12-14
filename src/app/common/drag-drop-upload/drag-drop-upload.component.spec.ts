@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DragDropUploadComponent } from './drag-drop-upload.component';
 
@@ -6,7 +6,7 @@ describe('DragDropUploadComponent', () => {
   let component: DragDropUploadComponent;
   let fixture: ComponentFixture<DragDropUploadComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ DragDropUploadComponent ]
     })
