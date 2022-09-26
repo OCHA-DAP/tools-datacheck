@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AnalyticsService as GenericAnalyticsService, GA_PAGEVIEW, GaExtras } from 'hxl-preview-ng-lib';
+import { AnalyticsService as GenericAnalyticsService } from 'hxl-preview-ng-lib';
 import { environment } from './../../environments/environment';
 
 declare const window: any;
@@ -12,11 +12,11 @@ export class AnalyticsService {
   public init() {
     const hostname = window.location.hostname;
 
-    const gaToken = environment['googleAnalyticsKey'];
+    // const gaToken = environment['googleAnalyticsKey'];
     const mpToken = hostname === environment['prodHostname'] ?          // if is prod use prod key
         environment['prodMixpanelKey'] : environment['testMixpanelKey'];
 
-    this.genericAnalyticsService.init(gaToken, mpToken);
+    this.genericAnalyticsService.init(mpToken);
   }
 
 
@@ -38,13 +38,17 @@ export class AnalyticsService {
       'locations': locations
     };
 
-    const gaData: GaExtras = {
-      label: datasourceUrl,
-      action: 'validate',
-      value: errNum,
-      dimensionInfo: {
-        'dimension2': datasourceType
-      }
+    // const gaData: GaExtras = {
+    //   label: datasourceUrl,
+    //   action: 'validate',
+    //   value: errNum,
+    //   dimensionInfo: {
+    //     'dimension2': datasourceType
+    //   }
+    // };
+    const gaData = {
+      'type': datasourceType,
+      'url': datasourceUrl,
     };
 
 
