@@ -8,6 +8,7 @@ on:
       - prod
       - hdx-*
       - ops-*
+    tags: [ '*' ]
   release:
     types: [published]
 
