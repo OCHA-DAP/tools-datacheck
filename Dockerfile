@@ -1,4 +1,4 @@
-FROM public.ecr.aws/unocha/nodejs-builder:14-alpine AS builder
+FROM public.ecr.aws/unocha/nodejs-builder:20-alpine AS builder
 
 WORKDIR /src
 
