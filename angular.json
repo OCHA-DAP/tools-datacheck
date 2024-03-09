@@ -158,7 +158,6 @@
       }
     }
   },
-  "defaultProject": "tools-datacheck-wizard",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "hdx",
