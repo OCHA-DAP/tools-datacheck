@@ -166,5 +166,8 @@
     "@schematics/angular:directive": {
       "prefix": "hdx"
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
