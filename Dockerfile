@@ -5,7 +5,7 @@ WORKDIR /src
 COPY . .
 
 RUN npm install npm@next-9 -g && \
-    npm install -g @angular/cli@v11-lts && \
+    npm install -g @angular/cli@v16-lts && \
     npm install && \
     ng build --prod --base-href /tools/datacheck/
 
