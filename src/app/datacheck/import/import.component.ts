@@ -325,7 +325,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
       minCols: 26,
       width: '100%',
       selectionModeString: 'single',
-      height: '100%',
+      height: '400px',
       // disableVisualSelection: ['area'],
       dragToScroll: false,
       afterSelection: afterSelection,
