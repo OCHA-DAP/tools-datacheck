@@ -7,7 +7,7 @@ COPY . .
 RUN npm install npm@next-9 -g && \
     npm install -g @angular/cli@v16-lts && \
     npm install && \
-    ng build --prod --base-href /tools/datacheck/
+    ng build --configuration production --base-href /tools/datacheck/
 
 FROM public.ecr.aws/unocha/nginx:stable
 
