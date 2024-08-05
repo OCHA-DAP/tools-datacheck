@@ -5,13 +5,13 @@ WORKDIR /src
 COPY . .
 
 RUN npm install npm@next-9 -g && \
-    npm install -g @angular/cli@v16-lts && \
-    npm install && \
-    ng build --configuration production --base-href /tools/datacheck/
+  npm install -g @angular/cli@v16-lts && \
+  npm install && \
+  ng build --configuration production --base-href /tools/datacheck/
 
 FROM public.ecr.aws/unocha/nginx:stable
 
-COPY ./docker/common.conf ./docker/default.conf /etc/nginx/http.d/
+COPY ./docker/default.conf /etc/nginx/http.d/
 COPY --from=builder /src/dist /var/www
 
 VOLUME /var/log/nginx
