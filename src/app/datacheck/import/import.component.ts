@@ -7,7 +7,7 @@ import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/
 import { AnalyticsService } from '../../common/analytics.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
-import * as Handsontable from 'handsontable';
+import Handsontable from 'handsontable';
 import { HotTableRegisterer } from '@handsontable/angular';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -325,7 +325,7 @@ export class ImportComponent extends ImportComponentPersistent implements OnInit
       minCols: 26,
       width: '100%',
       selectionModeString: 'single',
-      height: '100%',
+      height: '400px',
       // disableVisualSelection: ['area'],
       dragToScroll: false,
       afterSelection: afterSelection,
