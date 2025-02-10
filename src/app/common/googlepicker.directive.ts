@@ -4,7 +4,8 @@ declare const gapi: any;
 declare const google: any;
 
 @Directive({
-  selector: '[hdxGooglepicker]'
+    selector: '[hdxGooglepicker]',
+    standalone: false
 })
 export class GooglepickerDirective {
 

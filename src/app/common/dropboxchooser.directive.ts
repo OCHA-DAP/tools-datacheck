@@ -3,7 +3,8 @@ import { Directive, ChangeDetectorRef, Output, HostListener, EventEmitter } from
 declare const Dropbox: any;
 
 @Directive({
-  selector: '[hdxDropboxchooser]'
+    selector: '[hdxDropboxchooser]',
+    standalone: false
 })
 export class DropboxchooserDirective {
 

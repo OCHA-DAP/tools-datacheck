@@ -48,9 +48,10 @@ class ImportComponentPersistent {
 }
 
 @Component({
-  selector: 'app-import',
-  templateUrl: './import.component.html',
-  styleUrls: ['./import.component.less']
+    selector: 'app-import',
+    templateUrl: './import.component.html',
+    styleUrls: ['./import.component.less'],
+    standalone: false
 })
 export class ImportComponent extends ImportComponentPersistent implements OnInit  {
 

@@ -1,9 +1,10 @@
 import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 
 @Component({
-  selector: 'hdx-drag-drop-upload',
-  templateUrl: './drag-drop-upload.component.html',
-  styleUrls: ['./drag-drop-upload.component.less']
+    selector: 'hdx-drag-drop-upload',
+    templateUrl: './drag-drop-upload.component.html',
+    styleUrls: ['./drag-drop-upload.component.less'],
+    standalone: false
 })
 export class DragDropUploadComponent implements OnInit {
 
