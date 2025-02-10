@@ -15,32 +15,26 @@ import { HxlPreviewLibModule } from 'hxl-preview-ng-lib';
 import { HotTableModule } from '@handsontable/angular';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ModalModule } from 'ngx-bootstrap/modal';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    DatacheckComponent,
-    ImportComponent
-  ],
-  imports: [
-    ModalModule.forRoot(),
-    BsDropdownModule.forRoot(),
-    HxlPreviewLibModule,
-    CommonModule,
-    BrowserModule,
-    HttpClientModule,
-    AppRoutingModule,
-    FormsModule,
-    HotTableModule.forRoot(),
-    TooltipModule.forRoot()
-  ],
-  providers: [
-    HxlproxyService,
-    ConfigService,
-    RecipeService
-  ],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        DatacheckComponent,
+        ImportComponent
+    ],
+    bootstrap: [AppComponent], imports: [ModalModule.forRoot(),
+        BsDropdownModule.forRoot(),
+        HxlPreviewLibModule,
+        CommonModule,
+        BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        HotTableModule.forRoot(),
+        TooltipModule.forRoot()], providers: [
+        HxlproxyService,
+        ConfigService,
+        RecipeService,
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule { }
