@@ -1,18 +1,18 @@
-FROM public.ecr.aws/unocha/nodejs-builder:20-alpine AS builder
+FROM public.ecr.aws/unocha/nodejs-builder:22-alpine AS builder
 
 WORKDIR /src
 
 COPY . .
 
-RUN npm install npm@next-9 -g && \
-  npm install -g @angular/cli@v16-lts && \
+RUN npm install npm@10.9.2 -g && \
+  npm install -g @angular/cli@v19.1 && \
   npm install && \
   ng build --configuration production --base-href /tools/datacheck/
 
 FROM public.ecr.aws/unocha/nginx:stable
 
 COPY ./docker/default.conf /etc/nginx/http.d/
-COPY --from=builder /src/dist /var/www
+COPY --from=builder /src/dist/browser /var/www
 
 VOLUME /var/log/nginx
 
